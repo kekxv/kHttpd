@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     /* 使用libevent创建HTTP Server */
 
 
-    kHttpd kHttpd("./");
+    kHttpd kHttpd("./",httpd_option_port,httpd_option_listen,httpd_option_timeout);
     kHttpd.SetRoute(defaultRouteCallback);
     kHttpd.SetRoute(helloRouteCallback,"/hello");
     kHttpd.Listen();
