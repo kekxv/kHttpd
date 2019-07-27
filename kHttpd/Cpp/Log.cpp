@@ -1,4 +1,4 @@
-﻿#include "H/Log.h"
+﻿#include "Log.h"
 #ifndef WIN32
 #include <iconv.h>
 #endif

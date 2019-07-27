@@ -85,3 +85,10 @@ RequestData::Method RequestData::GetMethod() {
             return Method::Get;
     }
 }
+
+unsigned char *RequestData::GetBodyData() {
+    if (GetMethod() == Method::Post) {
+        return (unsigned char *) EVBUFFER_DATA(req->input_buffer);
+    }
+    return nullptr;
+}

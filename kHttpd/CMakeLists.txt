@@ -11,13 +11,16 @@ find_library(libevent libevent)
 
 if (APPLE)
     set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
-    include_directories(. ${LIBEVENT_INCLUDE_DIRS})
     link_directories(. /usr/local/lib/)
 endif ()
+include_directories(.
+        H
+        ${LIBEVENT_INCLUDE_DIRS}
+        )
+link_directories(.)
 
 aux_source_directory(Cpp CppSource)
 
-include_directories(H)
 
 add_library(kHttpd STATIC
             ${CppSource}

@@ -16,6 +16,7 @@
 
 #include "kHttpd.h"
 #include "RequestData.h"
+#include "Log.h"
 
 
 using namespace std;
@@ -45,6 +46,8 @@ namespace kHttpdName {
             {"ps",    "application/postscript"},
             {nullptr, nullptr},
     };
+
+    const char *kHttpd::TAG = "kHttpd";
 
     kHttpd::kHttpd(string WebRootPath, int port, const std::string &ip, int timeout) {
         this->WebRootPath = std::move(WebRootPath);
@@ -80,6 +83,7 @@ namespace kHttpdName {
         const char *path = evhttp_uri_get_path(evhttp_uri_parse(Request.URL.c_str()));
         if (!path) path = "/";
         string urlPath = path;
+
 
         if (that->RouteCallbacks.find(urlPath) != that->RouteCallbacks.end()) {
             that->RouteCallbacks[urlPath](Request, Response, that);
@@ -125,49 +129,64 @@ namespace kHttpdName {
                     evbuffer_add_printf(buf, "%s", Response.GetData().c_str());
                     evhttp_send_reply(req, (int) Response.Status, ResponseData::StatusToString(Response.Status).c_str(),
                                       buf);
+
                 }
                     break;
                 case ResponseData::File: {
                     string filePath = Response.GetFile();
-                    try {
-                        if (that->FileEvBufferFiles.find(filePath) == that->FileEvBufferFiles.end()) {
-                            int fileType = FileType(filePath);
-                            int fd = open(filePath.c_str(), O_RDWR);
-                            if (fd == -1) {
-                                throw kHttpdException(ResponseData::NotFound);
-                            }
-
-                            struct evbuffer_file_segment *seg = evbuffer_file_segment_new(fd, 0, -1, 0);
-                            if (seg == nullptr) {
-                                throw kHttpdException(ResponseData::InternalServerError);
-                            }
-                            that->FileEvBufferFiles[filePath] = seg;
+                    if (that->FileEvBufferFiles.find(filePath) == that->FileEvBufferFiles.end()) {
+                        int fileType = FileType(filePath);
+                        int fd = open(filePath.c_str(), O_RDWR);
+                        if (fd == -1) {
+                            throw kHttpdException(ResponseData::NotFound);
                         }
 
-                        evbuffer_add_file_segment(buf, that->FileEvBufferFiles[filePath], 0, -1);
-                        Response.Status = ResponseData::OK;
-                        evhttp_send_reply(req, (int) Response.Status,
-                                          ResponseData::StatusToString(Response.Status).c_str(), buf);
-                    } catch (kHttpdException &err) {
-                        Response.Status = err.status;
-                        Response.PutData(ResponseData::StatusToString(Response.Status));
-                        //输出的内容
-                        evbuffer_add_printf(buf, "%s", Response.GetData().c_str());
-                        evhttp_send_reply(req, (int) Response.Status,
-                                          ResponseData::StatusToString(Response.Status).c_str(), buf);
+                        struct evbuffer_file_segment *seg = evbuffer_file_segment_new(fd, 0, -1, 0);
+                        if (seg == nullptr) {
+                            throw kHttpdException(ResponseData::InternalServerError);
+                        }
+                        that->FileEvBufferFiles[filePath] = seg;
                     }
+
+                    evbuffer_add_file_segment(buf, that->FileEvBufferFiles[filePath], 0, -1);
+                    Response.Status = ResponseData::OK;
+                    evhttp_send_reply(req, (int) Response.Status,
+                                      ResponseData::StatusToString(Response.Status).c_str(), buf);
                 }
                     break;
                 case ResponseData::Binary: {
                     evbuffer_add(buf, Response.GetDataPtr(), Response.GetByteDataLen());
+                    evhttp_send_reply(req, (int) Response.Status,
+                                      ResponseData::StatusToString(Response.Status).c_str(), buf);
                 }
                     break;
             }
+
+            if(Response.Status>=200 && Response.Status<400) {
+                LogI(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
+                     ResponseData::StatusToString(Response.Status).c_str());
+            }else{
+                LogE(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
+                     ResponseData::StatusToString(Response.Status).c_str());
+            }
+
+        } catch (kHttpdException &err) {
+            Response.Status = err.status;
+            Response.PutData(ResponseData::StatusToString(Response.Status));
+            //输出的内容
+            evbuffer_add_printf(buf, "%s", Response.GetData().c_str());
+            evhttp_send_reply(req, (int) Response.Status,
+                              ResponseData::StatusToString(Response.Status).c_str(), buf);
+            LogE(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
+                 ResponseData::StatusToString(Response.Status).c_str());
         } catch (...) {
             //输出的内容
             evbuffer_add_printf(buf, "%s", "Page not found");
             Response.Status = ResponseData::NotFound;
             evhttp_send_reply(req, (int) Response.Status, ResponseData::StatusToString(Response.Status).c_str(), buf);
+
+            LogE(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
+                 ResponseData::StatusToString(Response.Status).c_str());
         }
         evbuffer_free(buf);
     }

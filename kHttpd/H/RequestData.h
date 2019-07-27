@@ -102,6 +102,8 @@ namespace kHttpdName {
           */
         const size_t MaxContentLength = 256 * 1024 * 1024;
 
+        unsigned char* GetBodyData();
+
     private:
         struct evhttp_request *req;
     };

@@ -6,13 +6,19 @@
 #include <sys/queue.h>
 #include <string>
 
-#include <kHttpd/H/kHttpd.h>
+#include <kHttpd.h>
+#include <Log.h>
 
 using namespace std;
 using namespace kHttpdName;
 
-void defaultRouteCallback(RequestData &Request, ResponseData &Response, void *){
+void defaultRouteCallback(RequestData &Request, ResponseData &Response, void *) {
     string output;
+    if(Request.URL.find("/favicon.ico")!=string::npos){
+        Response.Status = ResponseData::STATUS::NotFound;
+        Response.PutData("Not Found");
+        return;
+    }
 
     output += "\nGET";
     output += "\n\turi=" + Request.URL;
@@ -35,7 +41,8 @@ void defaultRouteCallback(RequestData &Request, ResponseData &Response, void *){
     Response.PutData(output);
     Response.ContentType = "text/plain; charset=UTF-8";
 }
-void helloRouteCallback(RequestData &, ResponseData &, void *){
+
+void helloRouteCallback(RequestData &, ResponseData &, void *) {
 
 }
 
@@ -61,19 +68,22 @@ int main(int argc, char *argv[]) {
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:dt:h")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:dt:hv:")) != -1) {
         switch (c) {
             case 'l' :
                 httpd_option_listen = optarg;
                 break;
             case 'p' :
-                httpd_option_port = atoi(optarg);
+                httpd_option_port = strtol((const char *) optarg, nullptr, 10);
                 break;
             case 'd' :
                 httpd_option_daemon = 1;
                 break;
             case 't' :
-                httpd_option_timeout = atoi(optarg);
+                httpd_option_timeout = strtol((const char *) optarg, nullptr, 10);
+                break;
+            case 'v' :
+                Log::setConsoleLevel(strtol((const char *) optarg, nullptr, 10));
                 break;
             case 'h' :
             default :
@@ -99,9 +109,10 @@ int main(int argc, char *argv[]) {
     /* 使用libevent创建HTTP Server */
 
 
-    kHttpd kHttpd("./",httpd_option_port,httpd_option_listen,httpd_option_timeout);
+    kHttpd kHttpd("./", httpd_option_port, httpd_option_listen, httpd_option_timeout);
     kHttpd.SetRoute(defaultRouteCallback);
-    kHttpd.SetRoute(helloRouteCallback,"/hello");
+    kHttpd.SetRoute(helloRouteCallback, "/hello");
+    LogI("kHttpdDemo","服务器开启：http://%s:%d/",httpd_option_listen,httpd_option_port);
     kHttpd.Listen();
     return 0;
 }

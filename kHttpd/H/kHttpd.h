@@ -18,6 +18,7 @@ namespace kHttpdName {
 
     class kHttpd {
     public:
+        static const char *TAG;
 
         /* Try to guess a good content-type for 'path' */
         static const char *GuessContentType(const char *path);
