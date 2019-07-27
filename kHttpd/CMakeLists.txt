@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst $(dir $<),,$<)\"'")
+set(CMAKE_CXX_STANDARD 14)
+add_definitions(
+        -DEN_REGEX
+)
+find_library(dl dl)
+find_library(pthread pthread)
+find_library(libevent libevent)
+
+if (APPLE)
+    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
+    include_directories(. ${LIBEVENT_INCLUDE_DIRS})
+    link_directories(. /usr/local/lib/)
+endif ()
+
+aux_source_directory(Cpp CppSource)
+
+include_directories(H)
+
+add_library(kHttpd STATIC
+            ${CppSource}
+        )
+TARGET_LINK_LIBRARIES(kHttpd dl event)
