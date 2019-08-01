@@ -112,7 +112,7 @@ namespace kHttpdName {
           * @brief 类型
           *
           */
-        string ContentType;
+        string ContentType = "text/html; charset=UTF-8";
         /**
          * @brief Construct a new Http Response Data object
          *

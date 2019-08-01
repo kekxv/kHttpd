@@ -20,21 +20,21 @@ RequestData::RequestData(struct evhttp_request *req) {
     ContentType = (*HEADER)["Content-Type"];
     string Cookie = (*HEADER)["Cookie"];
 
-    HOST =(*HEADER)["Host"];
+    HOST = (*HEADER)["Host"];
     IP = req->remote_host;
 
     if (!Cookie.empty()) {
+        COOKIES = std::move(Cookie);
         //正则表达式
         string regex_str("([^=]+)=([^;]*);?");
-        regex pattern1(regex_str,regex::icase);
+        regex pattern1(regex_str, regex::icase);
 
         //迭代器声明
         string::const_iterator iter = Cookie.begin();
-        string::const_iterator iterEnd= Cookie.end();
+        string::const_iterator iterEnd = Cookie.end();
         smatch result;
         //正则查找
-        while (std::regex_search(iter,iterEnd,result,pattern1))
-        {
+        while (std::regex_search(iter, iterEnd, result, pattern1)) {
             string t = result[1];
             string t1 = result[2];
             COOKIE[trim(t)] = trim(t1);

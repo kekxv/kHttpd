@@ -60,6 +60,11 @@ namespace kHttpdName {
           */
         map<string,string> COOKIE;
         /**
+          * @brief COOKIE 参数
+          *
+          */
+        string COOKIES;
+        /**
           * @brief HEADER 参数
           *
           */

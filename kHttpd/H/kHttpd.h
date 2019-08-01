@@ -9,6 +9,7 @@
 #include <RequestData.h>
 #include <ResponseData.h>
 #include <vector>
+#include "kCGI.h"
 
 #define HTTPD_SIGNATURE   "httpd v 0.0.1"
 
@@ -45,14 +46,25 @@ namespace kHttpdName {
 
         static bool isExists(const string &filePath);
 
-        vector<string> defaultIndex{"index.html", "index.htm"};
+        vector<string> defaultIndex{"index.php", "index.html", "index.htm"};
+
+        void SetCGI(string ip, int port);
+
+        void SetCGI(string sockPath);
 
     private:
         struct evhttp *httpd;
         string WebRootPath = ".";
+        string SockPath;
+        string IP = "";
+        int PORT = 0;
 
         //处理模块
         static void httpdHandler(struct evhttp_request *req, void *arg);
+
+        static void RunPhpCGI(const string& filePath,RequestData &Request,kCGI &kCgi,
+                              map<string, string> &header,
+                              vector<unsigned char> &data);
 
         RouteCallback defaultRouteCallback = nullptr;
         map<string, RouteCallback> RouteCallbacks;

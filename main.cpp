@@ -14,7 +14,7 @@ using namespace kHttpdName;
 
 void defaultRouteCallback(RequestData &Request, ResponseData &Response, void *) {
     string output;
-    if(Request.URL.find("/favicon.ico")!=string::npos){
+    if (Request.URL.find("/favicon.ico") != string::npos) {
         Response.Status = ResponseData::STATUS::NotFound;
         Response.PutData("Not Found");
         return;
@@ -62,28 +62,32 @@ int main(int argc, char *argv[]) {
 
     //默认参数
     const char *httpd_option_listen = "0.0.0.0";
+    string PhpSockPath;
     int httpd_option_port = 8080;
     int httpd_option_daemon = 0;
     int httpd_option_timeout = 120; //in seconds
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:dt:hv:")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:ds:t:hv")) != -1) {
         switch (c) {
             case 'l' :
                 httpd_option_listen = optarg;
                 break;
+            case 's' :
+                PhpSockPath = optarg;
+                break;
             case 'p' :
-                httpd_option_port = strtol((const char *) optarg, nullptr, 10);
+                httpd_option_port = (int) strtol((const char *) optarg, nullptr, 10);
                 break;
             case 'd' :
                 httpd_option_daemon = 1;
                 break;
             case 't' :
-                httpd_option_timeout = strtol((const char *) optarg, nullptr, 10);
+                httpd_option_timeout = (int) strtol((const char *) optarg, nullptr, 10);
                 break;
             case 'v' :
-                Log::setConsoleLevel(strtol((const char *) optarg, nullptr, 10));
+                Log::setConsoleLevel(3);
                 break;
             case 'h' :
             default :
@@ -107,12 +111,20 @@ int main(int argc, char *argv[]) {
     }
 
     /* 使用libevent创建HTTP Server */
+    const char *buffer;
+    if ((buffer = getcwd(nullptr, 0)) == nullptr) {
+        buffer = "./";
+    }
 
-
-    kHttpd kHttpd("./", httpd_option_port, httpd_option_listen, httpd_option_timeout);
+    kHttpd kHttpd(buffer, httpd_option_port, httpd_option_listen, httpd_option_timeout);
+    if (PhpSockPath.empty()) {
+        kHttpd.SetCGI("127.0.0.1", 9000);
+    } else {
+        kHttpd.SetCGI(PhpSockPath);
+    }
     kHttpd.SetRoute(defaultRouteCallback);
     kHttpd.SetRoute(helloRouteCallback, "/hello");
-    LogI("kHttpdDemo","服务器开启：http://%s:%d/",httpd_option_listen,httpd_option_port);
+    LogI("kHttpdDemo", "服务器开启：http://%s:%d/", httpd_option_listen, httpd_option_port);
     kHttpd.Listen();
     return 0;
 }

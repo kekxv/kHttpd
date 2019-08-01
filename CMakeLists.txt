@@ -15,3 +15,8 @@ add_executable(kHttpdDemo
         main.cpp
         )
 TARGET_LINK_LIBRARIES(kHttpdDemo dl kHttpd)
+
+add_executable(kCGITest
+        Test/kCGITest.cpp
+        )
+TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)

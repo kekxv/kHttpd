@@ -5,14 +5,14 @@
 //
 
 #include <unistd.h>     //for getopt, fork
-#include <string.h>     //for strcat
+#include <string>     //for strcat
 //for struct evkeyvalq
 #include <sys/queue.h>
-#include <signal.h>
 #include <event.h>
 #include <evhttp.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <kCGI.h>
 
 #include "kHttpd.h"
 #include "RequestData.h"
@@ -21,20 +21,20 @@
 
 using namespace std;
 namespace kHttpdName {
-
     constexpr static const struct table_entry {
         const char *extension;
         const char *content_type;
     } content_type_table[] = {
-            {"txt",   "text/plain"},
-            {"c",     "text/plain"},
-            {"h",     "text/plain"},
-            {"html",  "text/html"},
-            {"htm",   "text/htm"},
+            {"txt",   "text/plain; charset=utf-8"},
+            {"c",     "text/plain; charset=utf-8"},
+            {"h",     "text/plain; charset=utf-8"},
+            {"php",   "text/html; charset=utf-8"},
+            {"html",  "text/html; charset=utf-8"},
+            {"htm",   "text/htm; charset=utf-8"},
             {"css",   "text/css"},
-            {"js",    "application/javascript"},
-            {"json",  "application/json"},
-            {"xml",   "application/xml"},
+            {"js",    "application/javascript; charset=utf-8"},
+            {"json",  "application/json; charset=utf-8"},
+            {"xml",   "application/xml; charset=utf-8"},
             {"gif",   "image/gif"},
             {"jpg",   "image/jpeg"},
             {"jpeg",  "image/jpeg"},
@@ -46,6 +46,7 @@ namespace kHttpdName {
             {"ps",    "application/postscript"},
             {nullptr, nullptr},
     };
+
 
     const char *kHttpd::TAG = "kHttpd";
 
@@ -92,15 +93,62 @@ namespace kHttpdName {
 
             int fileType = FileType(filePath);
             if (fileType == 2) {
-                Response.PutFile(filePath.c_str());
-                Response.ContentType = GuessContentType(filePath.c_str());
+                GotoFileType:
+                if (filePath.find(".php") == string::npos) {
+                    Response.PutFile(filePath.c_str());
+                    Response.ContentType = GuessContentType(filePath.c_str());
+                } else {
+                    if (!that->SockPath.empty()) {
+                        try {
+                            kCGI php(that->SockPath);
+                            // map<string, string> header;
+                            vector<unsigned char> data;
+                            data.clear();
+                            RunPhpCGI(filePath, Request, php, Response.HEADER, data);
+                            Response.ContentType = Response.HEADER["Content-type"];
+                            Response.HEADER.erase("Content-type");
+                            Response.PutData(data.data(), data.size());
+
+                        } catch (kCGIException &kException) {
+                            goto GOTO_kCGI;
+                        }
+
+                    } else if (!that->IP.empty() && that->PORT > 0) {
+                        try {
+                            kCGI php(that->IP, that->PORT);
+                            // map<string, string> header;
+                            vector<unsigned char> data;
+                            data.clear();
+                            RunPhpCGI(filePath, Request, php, Response.HEADER, data);
+                            Response.ContentType = Response.HEADER["Content-type"];
+                            Response.HEADER.erase("Content-type");
+                            Response.PutData(data.data(), data.size());
+                        } catch (kCGIException &kException) {
+                            goto GOTO_kCGI;
+                        }
+
+                    } else {
+                        GOTO_kCGI:
+                        Response.HEADER["Content-Type"] = Response.ContentType;
+                        struct evbuffer *buf;
+                        buf = evbuffer_new();
+                        Response.Status = ResponseData::STATUS::InternalServerError;
+                        //输出的内容
+                        evbuffer_add_printf(buf, "%s", "未开启 PHP 支持");
+                        evhttp_send_reply(req, (int) Response.Status,
+                                          ResponseData::StatusToString(Response.Status).c_str(), buf);
+                        LogE(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
+                             ResponseData::StatusToString(Response.Status).c_str());
+                        evbuffer_free(buf);
+                        return;
+                    }
+                }
             } else if (fileType == 1) {
                 for (const auto &index : that->defaultIndex) {
                     string t = filePath.append("/").append(index);
                     fileType = FileType(t);
                     if (fileType == 2) {
-                        Response.PutFile(filePath.c_str());
-                        Response.ContentType = GuessContentType(filePath.c_str());
+                        goto GotoFileType;
                         break;
                     }
                 }
@@ -162,10 +210,10 @@ namespace kHttpdName {
                     break;
             }
 
-            if(Response.Status>=200 && Response.Status<400) {
+            if (Response.Status >= 200 && Response.Status < 400) {
                 LogI(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
                      ResponseData::StatusToString(Response.Status).c_str());
-            }else{
+            } else {
                 LogE(TAG, "请求地址：%s%s %d,%s", Request.HOST.c_str(), Request.URL.c_str(), (int) Response.Status,
                      ResponseData::StatusToString(Response.Status).c_str());
             }
@@ -226,7 +274,7 @@ namespace kHttpdName {
         }
 
         not_found:
-        return "text/plain";
+        return "text/plain; charset=utf-8";
     }
 
     int kHttpd::FileType(const string &path) {
@@ -246,5 +294,30 @@ namespace kHttpdName {
             //            cout << "ERR" << endl;
         }
         return -1;
+    }
+
+    void kHttpd::SetCGI(string sockPath) {
+        this->SockPath = std::move(sockPath);
+    }
+
+    void kHttpd::SetCGI(string ip, int port) {
+        this->IP = std::move(ip);
+        this->PORT = port;
+    }
+
+    void kHttpd::RunPhpCGI(const string &filePath, RequestData &Request, kCGI &kCgi,
+                           map<string, string> &header,
+                           vector<unsigned char> &data) {
+        kCgi.sendStartRequestRecord();
+        kCgi.sendParams("SCRIPT_FILENAME", filePath.c_str());
+        kCgi.sendParams("REQUEST_METHOD", Request.GetMethod() == RequestData::Method::Post ? "POST" : "GET");
+        kCgi.sendParams("REMOTE_HOST", Request.IP.c_str());
+        kCgi.sendParams("SERVER_NAME", Request.HOST.c_str());
+        kCgi.sendParams("SERVER_SOFTWARE", HTTPD_SIGNATURE);
+        kCgi.sendParams("HTTP_COOKIE", Request.COOKIES.c_str());
+        kCgi.sendEndRequestRecord();
+//        kCgiData kData;
+        kCgi.ReadFromPhp(header, data);
+//        kData.ToVector(data);
     }
 }
