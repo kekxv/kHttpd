@@ -10,7 +10,6 @@
 #include <sys/un.h>
 #include <regex>
 #include <GetDataParam.h>
-
 using namespace kHttpdName;
 int kCGI::RequestId = 1;
 

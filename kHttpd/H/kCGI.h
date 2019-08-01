@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <fastcgi.h>
 #include <map>
+#include <vector>
 
 using namespace std;
 namespace kHttpdName {
