@@ -1,5 +1,12 @@
 # kHttpd 服务端软件
 
+## v0.3
+
+- 增加车牌识别代码
+```shell script
+kHttpdDemo -v -C ../libCarNumOcr/model -w ../web_car/
+```
+
 ## v0.2
 
 ### 支持功能：

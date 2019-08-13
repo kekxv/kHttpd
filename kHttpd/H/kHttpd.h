@@ -17,6 +17,33 @@ struct evbuffer_file_segment;
 namespace kHttpdName {
     typedef void (*RouteCallback)(RequestData &, ResponseData &, void *);
 
+    constexpr static const struct table_entry {
+        const char *extension;
+        const char *content_type;
+    } content_type_table[] = {
+            {"txt",   "text/plain; charset=utf-8"},
+            {"c",     "text/plain; charset=utf-8"},
+            {"h",     "text/plain; charset=utf-8"},
+            {"php",   "text/html; charset=utf-8"},
+            {"html",  "text/html; charset=utf-8"},
+            {"htm",   "text/htm; charset=utf-8"},
+            {"css",   "text/css"},
+            {"js",    "application/javascript; charset=utf-8"},
+            {"json",  "application/json; charset=utf-8"},
+            {"xml",   "application/xml; charset=utf-8"},
+            {"gif",   "image/gif"},
+            {"jpg",   "image/jpeg"},
+            {"jpeg",  "image/jpeg"},
+            {"png",   "image/png"},
+            {"bmp",   "image/bmp"},
+            {"woff",  "application/font-woff"},
+            {"ico",   "image/x-icon"},
+            {"pdf",   "application/pdf"},
+            {"ps",    "application/postscript"},
+            {nullptr, nullptr},
+    };
+
+
     class kHttpd {
     public:
         static const char *TAG;

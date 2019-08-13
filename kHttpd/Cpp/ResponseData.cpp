@@ -171,6 +171,16 @@ namespace kHttpdName {
         BodyDataText = data;
         type = TYPE::Text;
     }
+    /**
+     * @brief 设置返回数据
+     *
+     * @param data
+     */
+    void ResponseData::PutData(const kHttpdName::JSON &_json) {
+        this->json = _json;
+        type = TYPE::JSON;
+        ContentType = "application/json; charset=utf-8";
+    }
 
     /**
      * @brief 返回文件
@@ -219,6 +229,18 @@ namespace kHttpdName {
             throw -1;
         }
         return BodyDataText;
+    }
+
+    /**
+     * @brief Get the Data object 获取文本数据
+     *
+     * @return string
+     */
+    JSON ResponseData::GetJSON() throw(int) {
+        if (type != TYPE::JSON) {
+            throw -1;
+        }
+        return json;
     }
 
     /**

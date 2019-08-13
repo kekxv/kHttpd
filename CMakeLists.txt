@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 
 add_subdirectory(kHttpd)
+add_subdirectory(libCarNumOcr)
 set(CMAKE_CXX_STANDARD 14)
 
+message(${CarNumOcr_INCLUDE_DIRS})
 include_directories(
         .
         kHttpd/H
+        libCarNumOcr
 )
 if (APPLE)
     link_directories(. /usr/local/lib/)
@@ -14,7 +17,7 @@ endif ()
 add_executable(kHttpdDemo
         main.cpp
         )
-TARGET_LINK_LIBRARIES(kHttpdDemo dl kHttpd)
+TARGET_LINK_LIBRARIES(kHttpdDemo dl kHttpd ${CarNumOcr_LIBS})
 
 add_executable(kCGITest
         Test/kCGITest.cpp

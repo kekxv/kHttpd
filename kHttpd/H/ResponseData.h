@@ -7,6 +7,7 @@
 
 #include <string>
 #include <map>
+#include <JSON.h>
 using namespace std;
 
 namespace kHttpdName {
@@ -101,7 +102,12 @@ namespace kHttpdName {
              * @brief 二进制流
              *
              */
-                    Binary
+                    Binary,
+            /**
+             * @brief 文本
+             *
+             */
+                    JSON,
         };
         /**
           * @brief 设置返回的状态码
@@ -130,6 +136,12 @@ namespace kHttpdName {
           */
         void PutData(const string& data);
         /**
+         * @brief 设置返回数据
+         *
+         * @param data
+         */
+        void PutData(const kHttpdName::JSON &_json);
+        /**
           * @brief 发送数据
           *
           * @param char
@@ -147,6 +159,7 @@ namespace kHttpdName {
          * @return string
          */
         string &GetData() throw(int);
+        kHttpdName::JSON GetJSON() throw(int);
         /**
          * @brief Get the File object 获取文件路径
          *
@@ -219,6 +232,8 @@ namespace kHttpdName {
          *
          */
         string BodyDataText;
+
+        kHttpdName::JSON json;
 
         /**
          * @brief 类型

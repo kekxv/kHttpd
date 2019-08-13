@@ -21,33 +21,6 @@
 
 using namespace std;
 namespace kHttpdName {
-    constexpr static const struct table_entry {
-        const char *extension;
-        const char *content_type;
-    } content_type_table[] = {
-            {"txt",   "text/plain; charset=utf-8"},
-            {"c",     "text/plain; charset=utf-8"},
-            {"h",     "text/plain; charset=utf-8"},
-            {"php",   "text/html; charset=utf-8"},
-            {"html",  "text/html; charset=utf-8"},
-            {"htm",   "text/htm; charset=utf-8"},
-            {"css",   "text/css"},
-            {"js",    "application/javascript; charset=utf-8"},
-            {"json",  "application/json; charset=utf-8"},
-            {"xml",   "application/xml; charset=utf-8"},
-            {"gif",   "image/gif"},
-            {"jpg",   "image/jpeg"},
-            {"jpeg",  "image/jpeg"},
-            {"png",   "image/png"},
-            {"bmp",   "image/bmp"},
-            {"woff",  "application/font-woff"},
-            {"ico",   "image/x-icon"},
-            {"pdf",   "application/pdf"},
-            {"ps",    "application/postscript"},
-            {nullptr, nullptr},
-    };
-
-
     const char *kHttpd::TAG = "kHttpd";
 
     kHttpd::kHttpd(string WebRootPath, int port, const std::string &ip, int timeout) {
@@ -145,9 +118,11 @@ namespace kHttpdName {
                 }
             } else if (fileType == 1) {
                 for (const auto &index : that->defaultIndex) {
-                    string t = filePath.append("/").append(index);
+                    string t = filePath;
+                    t.append("/").append(index);
                     fileType = FileType(t);
                     if (fileType == 2) {
+                        filePath = t;
                         goto GotoFileType;
                         break;
                     }
@@ -180,21 +155,30 @@ namespace kHttpdName {
 
                 }
                     break;
+                case ResponseData::JSON: {
+                    evbuffer_add_printf(buf, "%s", Response.GetJSON().toString().c_str());
+                    evhttp_send_reply(req, (int) Response.Status, ResponseData::StatusToString(Response.Status).c_str(),
+                                      buf);
+
+                }
+                    break;
                 case ResponseData::File: {
                     string filePath = Response.GetFile();
-                    if (that->FileEvBufferFiles.find(filePath) == that->FileEvBufferFiles.end()) {
-                        int fileType = FileType(filePath);
-                        int fd = open(filePath.c_str(), O_RDWR);
-                        if (fd == -1) {
-                            throw kHttpdException(ResponseData::NotFound);
-                        }
-
-                        struct evbuffer_file_segment *seg = evbuffer_file_segment_new(fd, 0, -1, 0);
-                        if (seg == nullptr) {
-                            throw kHttpdException(ResponseData::InternalServerError);
-                        }
-                        that->FileEvBufferFiles[filePath] = seg;
+                    if (that->FileEvBufferFiles.find(filePath) != that->FileEvBufferFiles.end()) {
+                        auto _ = that->FileEvBufferFiles[filePath];
+                        evbuffer_file_segment_free(_);
                     }
+                    int fileType = FileType(filePath);
+                    int fd = open(filePath.c_str(), O_RDWR);
+                    if (fd == -1) {
+                        throw kHttpdException(ResponseData::NotFound);
+                    }
+
+                    struct evbuffer_file_segment *seg = evbuffer_file_segment_new(fd, 0, -1, 0);
+                    if (seg == nullptr) {
+                        throw kHttpdException(ResponseData::InternalServerError);
+                    }
+                    that->FileEvBufferFiles[filePath] = seg;
 
                     evbuffer_add_file_segment(buf, that->FileEvBufferFiles[filePath], 0, -1);
                     Response.Status = ResponseData::OK;
@@ -278,6 +262,7 @@ namespace kHttpdName {
     }
 
     int kHttpd::FileType(const string &path) {
+        //LogD(TAG,"%s",path.c_str());
         struct stat s{};
         if (0 == stat(path.c_str(), &s)) {
             if (s.st_mode & S_IFDIR) {

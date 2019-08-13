@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <GetDataParam.h>
+#include <JSON.h>
 
 using namespace std;
 
@@ -59,6 +60,7 @@ namespace kHttpdName {
           *
           */
         map<string,string> COOKIE;
+        JSON json;
         /**
           * @brief COOKIE 参数
           *
