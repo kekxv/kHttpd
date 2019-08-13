@@ -22,6 +22,7 @@
                 load: function (result) {
                     document.querySelector("#p").src = result;
                     CarNumImage = result.split(";base64,",2)[1];
+                    OcrCarNum();
                 }
             });
             jsFileRead.step = 1024 * 1024 * 25;
