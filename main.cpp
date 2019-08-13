@@ -177,12 +177,13 @@ int main(int argc, char *argv[]) {
     web = kHttpd::GetRootPath(web);
 
 
-    kHttpd kHttpd(web.c_str(), httpd_option_port, httpd_option_listen, httpd_option_timeout);
+    kHttpd kHttpd(web, httpd_option_port, httpd_option_listen, httpd_option_timeout);
     if (PhpSockPath.empty()) {
         kHttpd.SetCGI("127.0.0.1", 9000);
     } else {
         kHttpd.SetCGI(PhpSockPath);
     }
+    // kHttpd.SetMaxBody(1024 * 1024);
     kHttpd.SetRoute(defaultRouteCallback);
     kHttpd.SetRoute(helloRouteCallback, "/hello");
     kHttpd.SetRoute(carNumOcrCallback, "/CarNumOcr.json");
