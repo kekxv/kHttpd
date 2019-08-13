@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
                     if (optarg == nullptr)
                         carNumOcr = new CarNumOcr();
                     else
-                        carNumOcr = new CarNumOcr(optarg);
+                        carNumOcr = new CarNumOcr(kHttpd::GetRootPath(optarg));
                 }
                 LogI("CarNumOcr", "开启车牌识别！");
                 break;
@@ -174,13 +174,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* 使用libevent创建HTTP Server */
-    const char *buffer;
-    if ((buffer = getcwd((char *) web.c_str(), 0)) == nullptr) {
-        buffer = "./";
-    }
+    web = kHttpd::GetRootPath(web);
 
-    kHttpd kHttpd(buffer, httpd_option_port, httpd_option_listen, httpd_option_timeout);
+
+    kHttpd kHttpd(web.c_str(), httpd_option_port, httpd_option_listen, httpd_option_timeout);
     if (PhpSockPath.empty()) {
         kHttpd.SetCGI("127.0.0.1", 9000);
     } else {

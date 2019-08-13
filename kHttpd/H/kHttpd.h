@@ -51,6 +51,18 @@ namespace kHttpdName {
         /* Try to guess a good content-type for 'path' */
         static const char *GuessContentType(const char *path);
 
+        inline static string GetRootPath(const string& d = "./") {
+            //filePathbuf变量是保存着相对路径的char型数组,dir用来保存绝对路径
+            char dir[2048] = "";
+            //1.转换绝对路径到dir
+            #ifdef _WIN32
+            _fullpath(dir,d.c_str(),sizeof(dir));
+            #else
+            realpath(d.c_str(), dir);
+            #endif
+            return dir;
+        }
+
         /**
          * 初始化
          * @param ip 监听地址
@@ -89,7 +101,7 @@ namespace kHttpdName {
         //处理模块
         static void httpdHandler(struct evhttp_request *req, void *arg);
 
-        static void RunPhpCGI(const string& filePath,RequestData &Request,kCGI &kCgi,
+        static void RunPhpCGI(const string &filePath, RequestData &Request, kCGI &kCgi,
                               map<string, string> &header,
                               vector<unsigned char> &data);
 
