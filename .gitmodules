@@ -1,0 +1,3 @@
+[submodule "libCarNumOcr"]
+	path = libCarNumOcr
+	url = https://git.kekxv.com/CarNum/libCarNumOcr.git
