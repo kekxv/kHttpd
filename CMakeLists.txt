@@ -4,7 +4,6 @@ add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
 set(CMAKE_CXX_STANDARD 14)
 
-message(${CarNumOcr_INCLUDE_DIRS})
 include_directories(
         .
         kHttpd/H
