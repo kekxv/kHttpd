@@ -5,9 +5,10 @@
     <title>测试</title>
     <script src="MiniAjax.js"></script>
     <script src="JsFileRead.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 <body>
-<input id="fileBtn" type="file" onchange="Update(this)" accept="image/*" capture="camera"/><br/>
+<input id="fileBtn" type="file" onchange="Update(this)" accept="image/*"/><br/>
 <button onclick="OcrCarNum()">开始识别</button>
 <div id="Result"></div>
 <hr/>
@@ -32,6 +33,8 @@
 
     function OcrCarNum() {
         if (!CarNumImage) return;
+        let ResultDiv = document.querySelector("#Result");
+        ResultDiv.innerHTML = "正在进行识别";
         let miniAjax = new MiniAjax({
             url: "/CarNumOcr.json",
             type: "POST",
@@ -41,7 +44,6 @@
             contentType: "application/json; charset=utf-8",
             success: function (responseText, status) {
                 let json = JSON.parse(responseText);
-                let ResultDiv = document.querySelector("#Result");
                 if(json.error === 0){
                     if(json.message.length === 0){
                         ResultDiv.innerHTML = "未发现车牌";
