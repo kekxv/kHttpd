@@ -22,3 +22,25 @@ add_executable(kCGITest
         Test/kCGITest.cpp
         )
 TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
+add_executable(udpServer
+        Test/UdpServer.cpp
+        )
+TARGET_LINK_LIBRARIES(udpServer dl kHttpd)
+
+
+find_library(dl dl)
+find_library(pthread pthread)
+find_library(libevent libevent)
+
+if (APPLE)
+    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
+    link_directories(. /usr/local/lib/)
+endif ()
+include_directories(.
+        ${LIBEVENT_INCLUDE_DIRS}
+        )
+link_directories(.)
+add_executable(test
+        Test/test.cpp
+        )
+TARGET_LINK_LIBRARIES(test dl kHttpd event)
