@@ -40,7 +40,7 @@ include_directories(.
         ${LIBEVENT_INCLUDE_DIRS}
         )
 link_directories(.)
-add_executable(test
+add_executable(test_tcp
         Test/test.cpp
         )
-TARGET_LINK_LIBRARIES(test dl kHttpd event)
+TARGET_LINK_LIBRARIES(test_tcp dl kHttpd event)
