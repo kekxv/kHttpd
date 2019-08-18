@@ -92,15 +92,15 @@ void read_cb(UdpServer &udpServer) {
                     return;
                 }
                 LogI(TAG,
-                     "\nAlive:%0x02X"
-                     "\nFrameSize:%0x02X"
-                     "\nFramerate:%0x02X"
-                     "\nSensorDeviceID:%d"
-                     "\nnTracks:%0x02X"
-                     "\nverServer:%d"
-                     "\nverCore:%0x02X"
-                     "\nverAnalytics:%0x02X"
-                     "\nverFirmware:%0x02X", Alive, FrameSize, Framerate,
+                     "\nAlive\t\t\t:%0x02X"
+                     "\nFrameSize\t\t:%0x02X"
+                     "\nFramerate\t\t:%0x02X"
+                     "\nSensorDeviceID\t:%d"
+                     "\nnTracks\t\t:%0x02X"
+                     "\nverServer\t\t:%d"
+                     "\nverCore\t\t\t:%0x02X"
+                     "\nverAnalytics\t\t:%0x02X"
+                     "\nverFirmware\t\t\t:%0x02X", Alive, FrameSize, Framerate,
                      SensorDeviceID, nTracks, verServer,
                      verCore,
                      verAnalytics,
@@ -144,13 +144,13 @@ void read_cb(UdpServer &udpServer) {
                     return;
                 }
                 LogI(TAG,
-                     "\nSensorDeviceID:%d"
-                     "\nTrackID:%d"
-                     "\nX:%d\nY:%d\nZ:%d"
-                     "\nSpeed:%d"
-                     "\nTriggerFlag:%d"
-                     "\nLane:%d"
-                     "\nClass:%d",
+                     "\nSensorDeviceID\t:%d"
+                     "\nTrackID\t\t:%d"
+                     "\nX\t\t\t\t:%d\nY:%d\nZ:%d"
+                     "\nSpeed\t\t\t:%d"
+                     "\nTriggerFlag\t:%d"
+                     "\nLane\t\t\t:%d"
+                     "\nClass\t\t\t:%d",
                      SensorDeviceID, TrackID,
                      X, Y, Z,
                      Speed,
