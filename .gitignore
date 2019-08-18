@@ -36,14 +36,12 @@ cTypeAB
 
 out/
 .vscode/
-test/
 log/
 DG02File.*
 *.bmp
 *.jpg
 *.pdf
 tags
-*Test
 DG02File1.*
 MiniCheckKey
 .idea
