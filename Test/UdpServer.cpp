@@ -113,12 +113,12 @@ void read_cb(UdpServer &udpServer) {
                      "\nAlive\t\t\t:0x%02X"
                      "\nFrameSize\t\t:0x%02X"
                      "\nFramerate\t\t:0x%02X"
-                     "\nSensorDeviceID\t:%d"
-                     "\nnTracks\t\t:0x%02X"
+                     "\nSensorDeviceID\t\t:%d"
+                     "\nnTracks\t\t\t:0x%02X"
                      "\nverServer\t\t:%d"
                      "\nverCore\t\t\t:0x%02X"
                      "\nverAnalytics\t\t:0x%02X"
-                     "\nverFirmware\t\t\t:0x%02X", Alive, FrameSize, Framerate,
+                     "\nverFirmware\t\t:0x%02X", Alive, FrameSize, Framerate,
                      SensorDeviceID, nTracks, verServer,
                      verCore,
                      verAnalytics,
@@ -145,10 +145,10 @@ void read_cb(UdpServer &udpServer) {
 
                 memcpy(&SensorDeviceID, &rData[2], sizeof(SensorDeviceID));
                 memcpy(&TrackID, &rData[3], sizeof(TrackID));
-                f_memcpy(&X, &rData[8]);
-                f_memcpy(&Y, &rData[12]);
-                f_memcpy(&Z, &rData[16]);
-                f_memcpy(&Speed, &rData[20]);
+                memcpy(&X, &rData[8], sizeof(X));
+                memcpy(&Y, &rData[12], sizeof(Y));
+                memcpy(&Z, &rData[16], sizeof(Z));
+                memcpy(&Speed, &rData[20], sizeof(Speed));
                 memcpy(&RCS, &rData[24], sizeof(RCS));
                 memcpy(&Reserved, &rData[26], sizeof(Reserved));
                 memcpy(&TriggerFlag, &rData[28], sizeof(TriggerFlag));
@@ -162,11 +162,11 @@ void read_cb(UdpServer &udpServer) {
                     return;
                 }
                 LogI(TAG,
-                     "\nSensorDeviceID\t:%d"
-                     "\nTrackID\t\t:%d"
-                     "\nX\t\t\t\t:%d\nY:%d\nZ:%d"
+                     "\nSensorDeviceID\t\t:%d"
+                     "\nTrackID\t\t\t:%d"
+                     "\nX\t\t\t:%f\nY\t\t\t:%f\nZ\t\t\t:%f"
                      "\nSpeed\t\t\t:%d"
-                     "\nTriggerFlag\t:%d"
+                     "\nTriggerFlag\t\t:%d"
                      "\nLane\t\t\t:%d"
                      "\nClass\t\t\t:%d",
                      SensorDeviceID, TrackID,

@@ -39,5 +39,7 @@ int main() {
         *((uchar *) f + i) = c_save[i];
     }
     printf("%f\n ", *(float*)f);
+    memcpy(&a,c_save,4);
+    printf("%f\n ",a);
     return 0;
 }
