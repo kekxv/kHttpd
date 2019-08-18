@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <Log.h>
 #include <cerrno>
+#include <cassert>
 
 using namespace std;
 using namespace kHttpdName;
