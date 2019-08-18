@@ -33,6 +33,24 @@ void *s_memcpy(void *dest, void *src, unsigned int count) {
     return dest;
 }
 
+bool f_memcpy(float *dest, void *src) {
+    assert((dest != nullptr) && (src != nullptr));
+    if (dest == src)
+        return false;
+
+    float a;
+    unsigned char c_save[4];
+    unsigned char i;
+    void *f;
+    f = &a;
+    memcpy(c_save, src, 4);
+    for (i = 0; i < 4; i++) {
+        *((unsigned char *) f + i) = c_save[i];
+    }
+    memcpy(dest, &a, sizeof(float));
+    return true;
+}
+
 void read_cb(UdpServer &udpServer) {
     unsigned char rData[BUF_SIZE];
     int len;
@@ -92,15 +110,15 @@ void read_cb(UdpServer &udpServer) {
                     return;
                 }
                 LogI(TAG,
-                     "\nAlive\t\t\t:%0x02X"
-                     "\nFrameSize\t\t:%0x02X"
-                     "\nFramerate\t\t:%0x02X"
+                     "\nAlive\t\t\t:0x%02X"
+                     "\nFrameSize\t\t:0x%02X"
+                     "\nFramerate\t\t:0x%02X"
                      "\nSensorDeviceID\t:%d"
-                     "\nnTracks\t\t:%0x02X"
+                     "\nnTracks\t\t:0x%02X"
                      "\nverServer\t\t:%d"
-                     "\nverCore\t\t\t:%0x02X"
-                     "\nverAnalytics\t\t:%0x02X"
-                     "\nverFirmware\t\t\t:%0x02X", Alive, FrameSize, Framerate,
+                     "\nverCore\t\t\t:0x%02X"
+                     "\nverAnalytics\t\t:0x%02X"
+                     "\nverFirmware\t\t\t:0x%02X", Alive, FrameSize, Framerate,
                      SensorDeviceID, nTracks, verServer,
                      verCore,
                      verAnalytics,
@@ -127,10 +145,10 @@ void read_cb(UdpServer &udpServer) {
 
                 memcpy(&SensorDeviceID, &rData[2], sizeof(SensorDeviceID));
                 memcpy(&TrackID, &rData[3], sizeof(TrackID));
-                memcpy(&X, &rData[8], sizeof(X));
-                memcpy(&Y, &rData[12], sizeof(Y));
-                memcpy(&Z, &rData[16], sizeof(Z));
-                memcpy(&Speed, &rData[20], sizeof(Speed));
+                f_memcpy(&X, &rData[8]);
+                f_memcpy(&Y, &rData[12]);
+                f_memcpy(&Z, &rData[16]);
+                f_memcpy(&Speed, &rData[20]);
                 memcpy(&RCS, &rData[24], sizeof(RCS));
                 memcpy(&Reserved, &rData[26], sizeof(Reserved));
                 memcpy(&TriggerFlag, &rData[28], sizeof(TriggerFlag));
