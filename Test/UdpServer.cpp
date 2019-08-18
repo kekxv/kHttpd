@@ -165,7 +165,7 @@ void read_cb(UdpServer &udpServer) {
                      "\nSensorDeviceID\t\t:%d"
                      "\nTrackID\t\t\t:%d"
                      "\nX\t\t\t:%f\nY\t\t\t:%f\nZ\t\t\t:%f"
-                     "\nSpeed\t\t\t:%d"
+                     "\nSpeed\t\t\t:%f"
                      "\nTriggerFlag\t\t:%d"
                      "\nLane\t\t\t:%d"
                      "\nClass\t\t\t:%d",
