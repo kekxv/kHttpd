@@ -1,5 +1,6 @@
 #include<iostream>
-#include<stdio.h>
+#include<cstdio>
+#include <string.h>
 
 #define uchar unsigned char
 using namespace std;
