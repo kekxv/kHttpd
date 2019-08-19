@@ -100,7 +100,7 @@ void Camera::Run(Camera *camera) {
             std::lock_guard<std::mutex> lk(camera->CameraMutex);
             camera->cap >> camera->LastMat;
         } else if (camera->IsStart) {
-            camera->release();
+            camera->cap.release();
             camera->start();
         }
         usleep(50 * 1000);
