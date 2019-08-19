@@ -142,13 +142,14 @@ void RunTrack(unsigned char *rData) {
          info.Class);
 #ifdef ENABLE_CAMERA
     if (!TrackFlag && camera != nullptr) {
-        camera->stop();
-        camera->start();
+//        camera->stop();
+//        camera->start();
         if (camera->isOpened()) {
             Mat img = camera->GetImage();
             if (img.empty()) {
                 LogE(TAG, "图片获取失败");
             } else {
+                LogI(TAG, "图片获取成功");
                 // imshow("img", img);
                 // waitKey(0);
                 TrackFlag = true;
@@ -271,6 +272,9 @@ void show_help() {
                        "-l <ip_addr>        interface to listen on, default is 0.0.0.0\n"
                        "-p <num>            port number to listen on, default is 10000\n"
                        "-v                  open log show\n"
+                       "-c <rtsp>           open rtsp video\n"
+                       "-C                  test rtsp\n"
+                       "-O <CarNumOcr>      enable CarNumOcr\n"
                        "-h                  print this help and exit\n"
                        "\n";
     fprintf(stderr, "%s", help);
@@ -299,6 +303,7 @@ int main(int argc, char *argv[]) {
             case 'c' :
 #ifdef ENABLE_CAMERA
                 camera = new Camera(optarg);
+                camera->start();
 #endif
                 break;
             case 'C':
@@ -331,8 +336,10 @@ int main(int argc, char *argv[]) {
     udpServer.SetCallback(read_cb);
     udpServer.Listen();
 #ifdef ENABLE_CAMERA
-    if (camera != nullptr)
+    if (camera != nullptr) {
+        camera->stop();
         delete camera;
+    }
 #endif
     if (carNumOcr != nullptr) {
         delete carNumOcr;

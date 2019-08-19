@@ -19,6 +19,7 @@ public:
     bool isOpened();
     bool stop();
     cv::Mat GetImage();
+    static long long GetTime();
 private:
     cv::VideoCapture cap;
     cv::Mat LastMat;
