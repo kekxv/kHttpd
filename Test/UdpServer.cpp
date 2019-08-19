@@ -3,15 +3,32 @@
 //
 
 #include <UdpServer.h>
+
+#ifdef ENABLE_CAMERA
+
+#include <Camera.h>
+#include <opencv2/opencv.hpp>
+
+#endif
+
 #include <unistd.h>
 #include <Log.h>
 #include <cerrno>
 #include <cassert>
+#include <kHttpd.h>
+#include <CarNumOcr.h>
 
+using namespace cv;
 using namespace std;
 using namespace kHttpdName;
 #define BUF_SIZE 1024
 const char *TAG = "main";
+
+
+#ifdef ENABLE_CAMERA
+static Camera *camera = nullptr;
+#endif
+CarNumOcr *carNumOcr = nullptr;
 
 unsigned char CheckSum(const unsigned char *data, int N) {
     unsigned char chksum = 0;
@@ -20,35 +37,128 @@ unsigned char CheckSum(const unsigned char *data, int N) {
     return chksum;
 }
 
-void *s_memcpy(void *dest, void *src, unsigned int count) {
-    assert((dest != nullptr) && (src != nullptr));
-    if (dest == src)
-        return src;
-    char *d = (char *) dest;
-    char *s = ((char *) src) + count - 1;
-
-    while (count-- > 0) {
-        *d++ = *s--;
+/**
+ * 状态消息处理
+ * @param rData
+ */
+void RunStatus(unsigned char *rData) {
+    unsigned char Alive, FrameSize, Framerate;
+    unsigned short SensorDeviceID = 0;
+    unsigned char nTracks;
+    unsigned short verServer = 0;
+    unsigned char verCore, verAnalytics, verFirmware, CRC;
+    unsigned short Footer = 0;
+    memcpy(&Alive, &rData[2], sizeof(Alive));
+    memcpy(&FrameSize, &rData[3], sizeof(FrameSize));
+    memcpy(&Framerate, &rData[4], sizeof(Framerate));
+    memcpy(&SensorDeviceID, &rData[5], sizeof(SensorDeviceID));
+    memcpy(&nTracks, &rData[7], sizeof(nTracks));
+    memcpy(&verServer, &rData[8], sizeof(verServer));
+    memcpy(&verCore, &rData[10], sizeof(verCore));
+    memcpy(&verAnalytics, &rData[11], sizeof(verAnalytics));
+    memcpy(&verFirmware, &rData[12], sizeof(verFirmware));
+    memcpy(&CRC, &rData[13], sizeof(CRC));
+    memcpy(&Footer, &rData[14], sizeof(Footer));
+    if (Footer != 0xEEFF) {
+        LogE(TAG, "STATUS PACKET 错误的尾部");
+        return;
     }
-    return dest;
+    LogI(TAG,
+         "\nAlive\t\t\t:0x%02X"
+         "\nFrameSize\t\t:0x%02X"
+         "\nFramerate\t\t:0x%02X"
+         "\nSensorDeviceID\t\t:%d"
+         "\nnTracks\t\t\t:0x%02X"
+         "\nverServer\t\t:%d"
+         "\nverCore\t\t\t:0x%02X"
+         "\nverAnalytics\t\t:0x%02X"
+         "\nverFirmware\t\t:0x%02X", Alive, FrameSize, Framerate,
+         SensorDeviceID, nTracks, verServer,
+         verCore,
+         verAnalytics,
+         verFirmware);
 }
 
-bool f_memcpy(float *dest, void *src) {
-    assert((dest != nullptr) && (src != nullptr));
-    if (dest == src)
-        return false;
+struct TrackInfo {
+    unsigned short SensorDeviceID = 0;
+    unsigned int TrackID = 0;
+    float X = 0, Y = 0, Z = 0, Speed = 0;
+    unsigned short RCS = 0, Reserved;
+    unsigned char TriggerFlag, Lane, Class, CRC;
+    unsigned short Footer;
+};
+bool TrackFlag = false;
 
-    float a;
-    unsigned char c_save[4];
-    unsigned char i;
-    void *f;
-    f = &a;
-    memcpy(c_save, src, 4);
-    for (i = 0; i < 4; i++) {
-        *((unsigned char *) f + i) = c_save[i];
+void Track(Mat img, TrackInfo trackInfo) {
+    try {
+        imwrite(string("./image")
+                + "[" + to_string(trackInfo.X) + "]"
+                + "[" + to_string(trackInfo.Y) + "]"
+                + "[" + to_string(trackInfo.Z) + "]" + ".png", img);
+    } catch (cv::Exception &e) {
+        LogE(TAG, "处理数据失败:%s", e.what());
     }
-    memcpy(dest, &a, sizeof(float));
-    return true;
+    TrackFlag = false;
+}
+
+/**
+ * 跟踪消息处理
+ * @param rData
+ */
+void RunTrack(unsigned char *rData) {
+    TrackInfo info{};
+
+    memcpy(&info.SensorDeviceID, &rData[2], sizeof(info.SensorDeviceID));
+    memcpy(&info.TrackID, &rData[3], sizeof(info.TrackID));
+    memcpy(&info.X, &rData[8], sizeof(info.X));
+    memcpy(&info.Y, &rData[12], sizeof(info.Y));
+    memcpy(&info.Z, &rData[16], sizeof(info.Z));
+    memcpy(&info.Speed, &rData[20], sizeof(info.Speed));
+    memcpy(&info.RCS, &rData[24], sizeof(info.RCS));
+    memcpy(&info.Reserved, &rData[26], sizeof(info.Reserved));
+    memcpy(&info.TriggerFlag, &rData[28], sizeof(info.TriggerFlag));
+    memcpy(&info.Lane, &rData[29], sizeof(info.Lane));
+    memcpy(&info.Class, &rData[30], sizeof(info.Class));
+    memcpy(&info.CRC, &rData[31], sizeof(info.CRC));
+    memcpy(&info.CRC, &rData[31], sizeof(info.CRC));
+    memcpy(&info.Footer, &rData[32], sizeof(info.Footer));
+    if (info.Footer != 0xDEFF) {
+        LogE(TAG, "TRACK PACKET 错误的尾部");
+        return;
+    }
+    LogI(TAG,
+         "\nSensorDeviceID\t\t:%d"
+         "\nTrackID\t\t\t:%d"
+         "\nX\t\t\t:%f\nY\t\t\t:%f\nZ\t\t\t:%f"
+         "\nSpeed\t\t\t:%f"
+         "\nTriggerFlag\t\t:%d"
+         "\nLane\t\t\t:%d"
+         "\nClass\t\t\t:%d",
+         info.SensorDeviceID, info.TrackID,
+         info.X, info.Y, info.Z,
+         info.Speed,
+         info.TriggerFlag,
+         info.Lane,
+         info.Class);
+#ifdef ENABLE_CAMERA
+    if (!TrackFlag && camera != nullptr) {
+        camera->stop();
+        camera->start();
+        if (camera->isOpened()) {
+            Mat img = camera->GetImage();
+            if (img.empty()) {
+                LogE(TAG, "图片获取失败");
+            } else {
+                // imshow("img", img);
+                // waitKey(0);
+                TrackFlag = true;
+                thread thread(Track, img, info);
+            }
+        } else {
+            LogE(TAG, "视频流开启失败");
+        }
+    }
+#endif
 }
 
 void read_cb(UdpServer &udpServer) {
@@ -87,43 +197,7 @@ void read_cb(UdpServer &udpServer) {
                 return;
             }
             LogD(TAG, "接收到 STATUS PACKET;准备处理");
-            {
-                unsigned char Alive, FrameSize, Framerate;
-                unsigned short SensorDeviceID = 0;
-                unsigned char nTracks;
-                unsigned short verServer = 0;
-                unsigned char verCore, verAnalytics, verFirmware, CRC;
-                unsigned short Footer = 0;
-                memcpy(&Alive, &rData[2], sizeof(Alive));
-                memcpy(&FrameSize, &rData[3], sizeof(FrameSize));
-                memcpy(&Framerate, &rData[4], sizeof(Framerate));
-                memcpy(&SensorDeviceID, &rData[5], sizeof(SensorDeviceID));
-                memcpy(&nTracks, &rData[7], sizeof(nTracks));
-                memcpy(&verServer, &rData[8], sizeof(verServer));
-                memcpy(&verCore, &rData[10], sizeof(verCore));
-                memcpy(&verAnalytics, &rData[11], sizeof(verAnalytics));
-                memcpy(&verFirmware, &rData[12], sizeof(verFirmware));
-                memcpy(&CRC, &rData[13], sizeof(CRC));
-                memcpy(&Footer, &rData[14], sizeof(Footer));
-                if (Footer != 0xEEFF) {
-                    LogE(TAG, "STATUS PACKET 错误的尾部");
-                    return;
-                }
-                LogI(TAG,
-                     "\nAlive\t\t\t:0x%02X"
-                     "\nFrameSize\t\t:0x%02X"
-                     "\nFramerate\t\t:0x%02X"
-                     "\nSensorDeviceID\t\t:%d"
-                     "\nnTracks\t\t\t:0x%02X"
-                     "\nverServer\t\t:%d"
-                     "\nverCore\t\t\t:0x%02X"
-                     "\nverAnalytics\t\t:0x%02X"
-                     "\nverFirmware\t\t:0x%02X", Alive, FrameSize, Framerate,
-                     SensorDeviceID, nTracks, verServer,
-                     verCore,
-                     verAnalytics,
-                     verFirmware);
-            }
+            RunStatus(rData);
             break;
         case 0x2101://3.TRACK PACKET
             if (len != 34) {
@@ -135,47 +209,7 @@ void read_cb(UdpServer &udpServer) {
                 return;
             }
             LogD(TAG, "接收到 TRACK PACKET;准备处理");
-            {
-                unsigned short SensorDeviceID = 0;
-                unsigned int TrackID = 0;
-                float X = 0, Y = 0, Z = 0, Speed = 0;
-                unsigned short RCS = 0, Reserved;
-                unsigned char TriggerFlag, Lane, Class, CRC;
-                unsigned short Footer;
-
-                memcpy(&SensorDeviceID, &rData[2], sizeof(SensorDeviceID));
-                memcpy(&TrackID, &rData[3], sizeof(TrackID));
-                memcpy(&X, &rData[8], sizeof(X));
-                memcpy(&Y, &rData[12], sizeof(Y));
-                memcpy(&Z, &rData[16], sizeof(Z));
-                memcpy(&Speed, &rData[20], sizeof(Speed));
-                memcpy(&RCS, &rData[24], sizeof(RCS));
-                memcpy(&Reserved, &rData[26], sizeof(Reserved));
-                memcpy(&TriggerFlag, &rData[28], sizeof(TriggerFlag));
-                memcpy(&Lane, &rData[29], sizeof(Lane));
-                memcpy(&Class, &rData[30], sizeof(Class));
-                memcpy(&CRC, &rData[31], sizeof(CRC));
-                memcpy(&CRC, &rData[31], sizeof(CRC));
-                memcpy(&Footer, &rData[32], sizeof(Footer));
-                if (Footer != 0xDEFF) {
-                    LogE(TAG, "TRACK PACKET 错误的尾部");
-                    return;
-                }
-                LogI(TAG,
-                     "\nSensorDeviceID\t\t:%d"
-                     "\nTrackID\t\t\t:%d"
-                     "\nX\t\t\t:%f\nY\t\t\t:%f\nZ\t\t\t:%f"
-                     "\nSpeed\t\t\t:%f"
-                     "\nTriggerFlag\t\t:%d"
-                     "\nLane\t\t\t:%d"
-                     "\nClass\t\t\t:%d",
-                     SensorDeviceID, TrackID,
-                     X, Y, Z,
-                     Speed,
-                     TriggerFlag,
-                     Lane,
-                     Class);
-            }
+            RunTrack(rData);
             break;
         case 0x5101://4.STATISTICS PACKET for Approaching direction
             LogI(TAG, "接收到 STATISTICS PACKET for Approaching direction，丢弃不处理");
@@ -212,6 +246,26 @@ void read_cb(UdpServer &udpServer) {
 
 }
 
+#ifdef ENABLE_CAMERA
+
+void TestCamera(Camera *pCamera) {
+    if (pCamera != nullptr) {
+        pCamera->stop();
+        pCamera->start();
+        while (pCamera->isOpened()) {
+            Mat img = pCamera->GetImage();
+            if (img.empty()) {
+                LogE(TAG, "图片获取失败");
+            } else {
+                LogI(TAG, "图片获取成功");
+                usleep(100 * 1000);
+            }
+        }
+    }
+}
+
+#endif
+
 void show_help() {
     const char *help = "help (http://kekxv.com)\n\n"
                        "-l <ip_addr>        interface to listen on, default is 0.0.0.0\n"
@@ -226,11 +280,12 @@ void show_help() {
 int main(int argc, char *argv[]) {
     //默认参数
     string httpd_option_listen = "0.0.0.0";
-    int httpd_option_port = 10000;
+    int httpd_option_port = 9935;
+    bool cTest = false;
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hv")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:hvc:CO::")) != -1) {
         switch (c) {
             case 'l' :
                 httpd_option_listen = optarg;
@@ -241,16 +296,47 @@ int main(int argc, char *argv[]) {
             case 'v' :
                 kHttpdName::Log::setConsoleLevel(3);
                 break;
+            case 'c' :
+#ifdef ENABLE_CAMERA
+                camera = new Camera(optarg);
+#endif
+                break;
+            case 'C':
+                cTest = true;
+                break;
+            case 'O' :
+                if (carNumOcr == nullptr) {
+                    if (optarg == nullptr)
+                        carNumOcr = new CarNumOcr();
+                    else
+                        carNumOcr = new CarNumOcr(kHttpd::GetRootPath(optarg));
+                }
+                LogI("CarNumOcr", "开启车牌识别！");
+                break;
             case 'h' :
             default :
                 show_help();
                 exit(EXIT_SUCCESS);
         }
     }
-
+#ifdef ENABLE_CAMERA
+    if (cTest) {
+        TestCamera(camera);
+        exit(EXIT_SUCCESS);
+        return 1;
+    }
+#endif
 
     UdpServer udpServer(httpd_option_listen, httpd_option_port);
     udpServer.SetCallback(read_cb);
     udpServer.Listen();
+#ifdef ENABLE_CAMERA
+    if (camera != nullptr)
+        delete camera;
+#endif
+    if (carNumOcr != nullptr) {
+        delete carNumOcr;
+        carNumOcr = nullptr;
+    }
     return 0;
 }

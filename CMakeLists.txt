@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 
 add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
+
+option(ENABLE_CAMERA "option for CAMERA" OFF)
+if (ENABLE_CAMERA)
+    add_definitions(-DENABLE_CAMERA)
+    add_subdirectory(Camera)
+    find_package(OpenCV REQUIRED)
+endif ()
+
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(
@@ -9,7 +17,19 @@ include_directories(
         kHttpd/H
         libCarNumOcr
 )
+
+find_library(dl dl)
+find_library(pthread pthread)
+find_library(libevent libevent)
+include_directories(.
+        Camera
+        ${LIBEVENT_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+        )
+
 if (APPLE)
+    link_directories(. /usr/local/lib/)
+    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
     link_directories(. /usr/local/lib/)
 endif ()
 
@@ -25,20 +45,9 @@ TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )
-TARGET_LINK_LIBRARIES(udpServer dl kHttpd)
+TARGET_LINK_LIBRARIES(udpServer dl kHttpd ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS})
 
 
-find_library(dl dl)
-find_library(pthread pthread)
-find_library(libevent libevent)
-
-if (APPLE)
-    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
-    link_directories(. /usr/local/lib/)
-endif ()
-include_directories(.
-        ${LIBEVENT_INCLUDE_DIRS}
-        )
 link_directories(.)
 add_executable(test_tcp
         Test/test.cpp
