@@ -45,7 +45,7 @@ TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )
-TARGET_LINK_LIBRARIES(udpServer dl kHttpd ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS})
+TARGET_LINK_LIBRARIES(udpServer dl kHttpd pthread ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS})
 
 
 link_directories(.)
