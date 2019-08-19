@@ -65,6 +65,7 @@ bool Camera::start() {
     auto e = GetTime() + 1000 * 3;
     while (GetImage().empty()) {
         if (GetTime() > e)break;
+        usleep(50);
     };
     return IsStart;
 }
