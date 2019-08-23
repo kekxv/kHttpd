@@ -124,7 +124,7 @@ void RunTrack(unsigned char *rData) {
     memcpy(&info.Footer, &rData[32], sizeof(info.Footer));
     if (info.Footer != 0xDEFF) {
         LogE(TAG, "TRACK PACKET 错误的尾部");
-        return;
+//        return;
     }
     LogI(TAG,
          "\nSensorDeviceID\t\t:%d"
@@ -154,6 +154,7 @@ void RunTrack(unsigned char *rData) {
                 // waitKey(0);
                 TrackFlag = true;
                 thread thread(Track, img, info);
+                thread.detach();
             }
         } else {
             LogE(TAG, "视频流开启失败");
