@@ -91,10 +91,29 @@ bool TrackFlag = false;
 
 void Track(Mat img, TrackInfo trackInfo) {
     try {
+        double s32X, s32Y, u32Height, u32Width;
+        double OG_VIDEO_WIDTH = img.cols;
+        double OG_VIDEO_HEIGHT = img.rows;
+        int g_og_XOffset = 10;
+        int g_og_YOffset = 10;
+        int g_og_XOffset_Leav = 10;
+        int g_og_YOffset_Leav = 10;
+        double OG_REGION_FOUCS = OG_VIDEO_WIDTH;
+        //1280*720
+        if (trackInfo.Speed > 0) {
+            s32X = OG_VIDEO_WIDTH / 2.0 - OG_REGION_FOUCS * trackInfo.X / trackInfo.Z + g_og_XOffset;
+            s32Y = OG_VIDEO_HEIGHT / 2.0 - OG_REGION_FOUCS * trackInfo.Y / trackInfo.Z + g_og_YOffset;
+        } else {
+            s32X = OG_VIDEO_WIDTH / 2.0 - OG_REGION_FOUCS * trackInfo.X / trackInfo.Z + g_og_XOffset_Leav;
+            s32Y = OG_VIDEO_HEIGHT / 2.0 - OG_REGION_FOUCS * trackInfo.Y / trackInfo.Z + g_og_YOffset_Leav;
+        }
+        u32Width = u32Height = 2.0 * OG_REGION_FOUCS * 200 / trackInfo.Z; //(200-Z)/2;
+
         imwrite(string("./image")
-                + "[" + to_string(trackInfo.X) + "]"
-                + "[" + to_string(trackInfo.Y) + "]"
-                + "[" + to_string(trackInfo.Z) + "]" + ".png", img);
+                + "[" + to_string(s32X) + "]"
+                + "[" + to_string(s32Y) + "]"
+                + "[" + to_string(u32Width) + "]"
+                + "[" + to_string(u32Height) + "]" + ".png", img);
     } catch (cv::Exception &e) {
         LogE(TAG, "处理数据失败:%s", e.what());
     }
