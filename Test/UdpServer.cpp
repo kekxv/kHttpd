@@ -24,7 +24,7 @@ using namespace kHttpdName;
 #define BUF_SIZE 1024
 const char *TAG = "main";
 
-
+float z_x = 0.0, z_y = 0.0, z_Z = 1.0;
 #ifdef ENABLE_CAMERA
 static Camera *camera = nullptr;
 #endif
@@ -94,20 +94,16 @@ void Track(Mat img, TrackInfo trackInfo) {
         double s32X, s32Y, u32Height, u32Width;
         double OG_VIDEO_WIDTH = img.cols;
         double OG_VIDEO_HEIGHT = img.rows;
-        int g_og_XOffset = 10;
-        int g_og_YOffset = 10;
-        int g_og_XOffset_Leav = 10;
-        int g_og_YOffset_Leav = 10;
         double OG_REGION_FOUCS = OG_VIDEO_WIDTH;
         //1280*720
         if (trackInfo.Speed > 0) {
-            s32X = OG_VIDEO_WIDTH / 2.0 - OG_REGION_FOUCS * trackInfo.X / trackInfo.Z + g_og_XOffset;
-            s32Y = OG_VIDEO_HEIGHT / 2.0 - OG_REGION_FOUCS * trackInfo.Y / trackInfo.Z + g_og_YOffset;
+            s32X = trackInfo.X + z_x + OG_VIDEO_WIDTH / 20;
+            s32Y = trackInfo.Y + z_y + OG_VIDEO_HEIGHT / 20;
         } else {
-            s32X = OG_VIDEO_WIDTH / 2.0 - OG_REGION_FOUCS * trackInfo.X / trackInfo.Z + g_og_XOffset_Leav;
-            s32Y = OG_VIDEO_HEIGHT / 2.0 - OG_REGION_FOUCS * trackInfo.Y / trackInfo.Z + g_og_YOffset_Leav;
+            s32X = trackInfo.X + z_x;
+            s32Y = trackInfo.Y + z_y;
         }
-        u32Width = u32Height = 2.0 * OG_REGION_FOUCS * 200 / trackInfo.Z; //(200-Z)/2;
+        u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
 
         Rect rect = Rect(s32X, s32Y, u32Width, u32Height);//起点；长宽
         Scalar color = Scalar(55, 55, 55);
@@ -298,6 +294,9 @@ void show_help() {
                        "-v                  open log show\n"
                        "-c <rtsp>           open rtsp video\n"
                        "-C                  test rtsp\n"
+                       "-x                  原点偏移 x\n"
+                       "-y                  原点偏移 y\n"
+                       "-Z                  汽车和距离的比例\n"
                        "-O <CarNumOcr>      enable CarNumOcr\n"
                        "-h                  print this help and exit\n"
                        "\n";
@@ -313,13 +312,22 @@ int main(int argc, char *argv[]) {
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hvc:CO::")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::")) != -1) {
         switch (c) {
             case 'l' :
                 httpd_option_listen = optarg;
                 break;
             case 'p' :
                 httpd_option_port = (int) strtol((const char *) optarg, nullptr, 10);
+                break;
+            case 'x' :
+                z_x = strtof((const char *) optarg, nullptr);
+                break;
+            case 'y' :
+                z_y = strtof((const char *) optarg, nullptr);
+                break;
+            case 'Z' :
+                z_Z = strtof((const char *) optarg, nullptr);
                 break;
             case 'v' :
                 kHttpdName::Log::setConsoleLevel(3);
