@@ -109,6 +109,8 @@ void Track(Mat img, TrackInfo trackInfo) {
         }
         u32Width = u32Height = 2.0 * OG_REGION_FOUCS * 200 / trackInfo.Z; //(200-Z)/2;
 
+
+
         imwrite(string("./image")
                 + "[" + to_string(s32X) + "]"
                 + "[" + to_string(s32Y) + "]"
