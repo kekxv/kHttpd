@@ -109,7 +109,9 @@ void Track(Mat img, TrackInfo trackInfo) {
         }
         u32Width = u32Height = 2.0 * OG_REGION_FOUCS * 200 / trackInfo.Z; //(200-Z)/2;
 
-
+        Rect rect = Rect(s32X, s32Y, u32Width, u32Height);//起点；长宽
+        Scalar color = Scalar(55, 55, 55);
+        rectangle(img, rect, color, 1, LINE_8);
 
         imwrite(string("./image")
                 + "[" + to_string(s32X) + "]"
