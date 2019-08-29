@@ -169,6 +169,7 @@ void RunTrack(unsigned char *rData) {
                 LogE(TAG, "图片获取失败");
             } else {
                 LogI(TAG, "图片获取成功");
+                resize(img,img,Size(640,480));
                 // imshow("img", img);
                 // waitKey(0);
                 TrackFlag = true;
