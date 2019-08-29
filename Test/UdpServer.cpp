@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:Z:")) != -1) {
         switch (c) {
             case 'F' :
                 imshow(optarg, imread(optarg));
