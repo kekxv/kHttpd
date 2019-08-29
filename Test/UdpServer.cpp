@@ -96,19 +96,18 @@ void Track(Mat img, TrackInfo trackInfo) {
         double OG_VIDEO_HEIGHT = img.rows;
         double OG_REGION_FOUCS = OG_VIDEO_WIDTH;
         //1280*720
+        s32X = trackInfo.X * z_Z + z_x;
+        s32Y = trackInfo.Y * z_Z + z_y;
         if (trackInfo.Speed > 0) {
-            s32X = trackInfo.X + z_x + trackInfo.Speed * z_Z;
-            s32Y = trackInfo.Y + z_y + trackInfo.Speed * z_Z;
-        } else {
-            s32X = trackInfo.X + z_x;
-            s32Y = trackInfo.Y + z_y;
+            s32X += trackInfo.Speed * z_Z;
+            s32Y += trackInfo.Speed * z_Z;
         }
         u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
         if (s32X < 0) s32X = 0;
         if (s32Y < 0) s32Y = 0;
         Rect rect = Rect(s32X, s32Y, u32Width, u32Height);//起点；长宽
-        Scalar color = Scalar(55, 55, 55);
-        rectangle(img, rect, color, 1, LINE_8);
+        Scalar color = Scalar(0, 255, 255);
+        rectangle(img, rect, color, 5, LINE_8);
 
         imwrite(string("./image")
                 + "[" + to_string(s32X) + "]"
