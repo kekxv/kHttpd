@@ -25,6 +25,7 @@ using namespace kHttpdName;
 const char *TAG = "main";
 
 float z_x = 0.0, z_y = 0.0, z_Z = 1.0;
+int width = 1400, height = 900;
 #ifdef ENABLE_CAMERA
 static Camera *camera = nullptr;
 #endif
@@ -105,7 +106,7 @@ void Track(Mat img, TrackInfo trackInfo) {
         u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
         if (s32X < 0) s32X = 0;
         if (s32Y < 0) s32Y = 0;
-        Rect rect = Rect((int)s32X, (int)s32Y, (int)u32Width, (int)u32Height);//起点；长宽
+        Rect rect = Rect((int) s32X, (int) s32Y, (int) u32Width, (int) u32Height);//起点；长宽
         Scalar color = Scalar(0, 255, 0);
         rectangle(img, rect, color, 2, LINE_8);
 
@@ -169,7 +170,7 @@ void RunTrack(unsigned char *rData) {
                 LogE(TAG, "图片获取失败");
             } else {
                 LogI(TAG, "图片获取成功");
-                resize(img,img,Size(640,480));
+                resize(img, img, Size(width, height));
                 // imshow("img", img);
                 // waitKey(0);
                 TrackFlag = true;
@@ -334,6 +335,12 @@ int main(int argc, char *argv[]) {
                 break;
             case 'Z' :
                 z_Z = strtof((const char *) optarg, nullptr);
+                break;
+            case 'W' :
+                width = strtol((const char *) optarg, nullptr, 10);
+                break;
+            case 'H' :
+                height = strtol((const char *) optarg, nullptr, 10);
                 break;
             case 'v' :
                 kHttpdName::Log::setConsoleLevel(3);
