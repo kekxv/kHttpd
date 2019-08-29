@@ -105,9 +105,9 @@ void Track(Mat img, TrackInfo trackInfo) {
         u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
         if (s32X < 0) s32X = 0;
         if (s32Y < 0) s32Y = 0;
-        Rect rect = Rect(s32X, s32Y, u32Width, u32Height);//起点；长宽
-        Scalar color = Scalar(0, 255, 255);
-        rectangle(img, rect, color, 5, LINE_8);
+        Rect rect = Rect((int)s32X, (int)s32Y, (int)u32Width, (int)u32Height);//起点；长宽
+        Scalar color = Scalar(0, 255, 0);
+        rectangle(img, rect, color, 2, LINE_8);
 
         imwrite(string("./image")
                 + "[" + to_string(s32X) + "]"
