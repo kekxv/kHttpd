@@ -30,6 +30,7 @@ int width = 1400, height = 900;
 static Camera *camera = nullptr;
 #endif
 CarNumOcr *carNumOcr = nullptr;
+VideoWriter out;
 
 unsigned char CheckSum(const unsigned char *data, int N) {
     unsigned char chksum = 0;
@@ -110,11 +111,13 @@ void Track(Mat img, TrackInfo trackInfo) {
         Scalar color = Scalar(0, 255, 0);
         rectangle(img, rect, color, 2, LINE_8);
 
-        imwrite(string("./image")
-                + "[" + to_string(s32X) + "]"
-                + "[" + to_string(s32Y) + "]"
-                + "[" + to_string(u32Width) + "]"
-                + "[" + to_string(u32Height) + "]" + ".png", img);
+//        imwrite(string("./image")
+//                + "[" + to_string(s32X) + "]"
+//                + "[" + to_string(s32Y) + "]"
+//                + "[" + to_string(u32Width) + "]"
+//                + "[" + to_string(u32Height) + "]" + ".png", img);
+//        out.write(img);
+        out << img;
     } catch (cv::Exception &e) {
         LogE(TAG, "处理数据失败:%s", e.what());
     }
@@ -299,6 +302,7 @@ void show_help() {
                        "-x                  原点偏移 x\n"
                        "-y                  原点偏移 y\n"
                        "-Z                  汽车和距离的比例\n"
+                       "-o <video path>     要保存的视频地址\n"
                        "-O <CarNumOcr>      enable CarNumOcr\n"
                        "-h                  print this help and exit\n"
                        "\n";
@@ -311,10 +315,11 @@ int main(int argc, char *argv[]) {
     string httpd_option_listen = "0.0.0.0";
     int httpd_option_port = 9935;
     bool cTest = false;
+    string outVideo;
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:Z:")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:Z:o:")) != -1) {
         switch (c) {
             case 'F' :
                 imshow(optarg, imread(optarg));
@@ -354,6 +359,9 @@ int main(int argc, char *argv[]) {
             case 'C':
                 cTest = true;
                 break;
+            case 'o':
+                outVideo = optarg;
+                break;
             case 'O' :
                 if (carNumOcr == nullptr) {
                     if (optarg == nullptr)
@@ -376,6 +384,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 #endif
+    if (!outVideo.empty())
+        out.open(outVideo, VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, Size(width, height));
+
 
     UdpServer udpServer(httpd_option_listen, httpd_option_port);
     udpServer.SetCallback(read_cb);
@@ -386,6 +397,9 @@ int main(int argc, char *argv[]) {
         delete camera;
     }
 #endif
+    if (out.isOpened()) {
+        out.release();
+    }
     if (carNumOcr != nullptr) {
         delete carNumOcr;
         carNumOcr = nullptr;
