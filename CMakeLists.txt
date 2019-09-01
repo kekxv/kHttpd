@@ -37,7 +37,7 @@ endif ()
 add_executable(kHttpdDemo
         main.cpp
         )
-TARGET_LINK_LIBRARIES(kHttpdDemo dl kHttpd ${CarNumOcr_LIBS})
+TARGET_LINK_LIBRARIES(kHttpdDemo dl kHttpd ${CarNumOcr_LIBS} ${LIBEVENT_LIBRARIES})
 
 add_executable(kCGITest
         Test/kCGITest.cpp
@@ -46,7 +46,7 @@ TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )
-TARGET_LINK_LIBRARIES(udpServer dl kHttpd pthread ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS})
+TARGET_LINK_LIBRARIES(udpServer dl kHttpd pthread ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS} ${LIBEVENT_LIBRARIES})
 
 
 link_directories(.)
