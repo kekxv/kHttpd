@@ -32,6 +32,16 @@ static Camera *camera = nullptr;
 CarNumOcr *carNumOcr = nullptr;
 VideoWriter out;
 
+struct TrackInfo {
+    unsigned short SensorDeviceID = 0;
+    unsigned int TrackID = 0;
+    float X = 0, Y = 0, Z = 0, Speed = 0;
+    unsigned short RCS = 0, Reserved;
+    unsigned char TriggerFlag, Lane, Class, CRC;
+    unsigned short Footer;
+};
+bool TrackFlag = false;
+
 unsigned char CheckSum(const unsigned char *data, int N) {
     unsigned char chksum = 0;
     for (int idx = 0; idx < N; idx++)
@@ -40,10 +50,43 @@ unsigned char CheckSum(const unsigned char *data, int N) {
 }
 
 /**
+ * 跟踪消息处理
+ * @param rData
+ */
+void RunTracks(Mat img,vector<TrackInfo> trackInfos){
+    try {
+        double s32X, s32Y, u32Height, u32Width;
+        double OG_VIDEO_WIDTH = img.cols;
+        double OG_VIDEO_HEIGHT = img.rows;
+        double OG_REGION_FOUCS = OG_VIDEO_WIDTH;
+        for(auto trackInfo : trackInfos) {
+            //1280*720
+            s32X = trackInfo.X * z_Z + z_x;
+            s32Y = trackInfo.Y * z_Z + z_y;
+            if (trackInfo.Speed > 0) {
+                s32X += trackInfo.Speed * z_Z;
+                s32Y += trackInfo.Speed * z_Z;
+            }
+            u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
+            if (s32X < 0) s32X = 0;
+            if (s32Y < 0) s32Y = 0;
+            Rect rect = Rect((int) s32X, (int) s32Y, (int) u32Width, (int) u32Height);//起点；长宽
+            Scalar color = Scalar(0, 255, 0);
+            rectangle(img, rect, color, 2, LINE_8);
+        }
+        if (out.isOpened())
+            out.write(img);
+    } catch (cv::Exception &e) {
+        LogE(TAG, "处理数据失败:%s", e.what());
+    }
+    TrackFlag = false;
+
+}
+/**
  * 状态消息处理
  * @param rData
  */
-void RunStatus(unsigned char *rData) {
+void RunStatus(unsigned char *rData, UdpServer &udpServer) {
     unsigned char Alive, FrameSize, Framerate;
     unsigned short SensorDeviceID = 0;
     unsigned char nTracks;
@@ -79,17 +122,70 @@ void RunStatus(unsigned char *rData) {
          verCore,
          verAnalytics,
          verFirmware);
+
+    unsigned char mData[BUF_SIZE];
+    int len;
+    struct sockaddr_in client_addr{};
+    vector<TrackInfo> _TrackInfo;
+    for (unsigned char i = 0; i < nTracks; i++) {
+        memset(mData, 0, sizeof(mData));
+        len = udpServer.read((void *) mData, sizeof(mData), &client_addr);
+        if (len == -1)return;
+        if (len == 0)return;
+        if (len < 2)return;
+        unsigned int Header = 0;//= (mData[1] << 0) | (mData[0] << 8);
+        memcpy(&Header, &mData[0], sizeof(unsigned short));
+        if (Header != 0x2101) {
+            i--;
+            continue;
+        }
+        //3.TRACK PACKET
+        if (len < 34) return;
+        if (CheckSum(&mData[0], 31) != mData[31]) return;
+        TrackInfo info{};
+        memcpy(&info.SensorDeviceID, &mData[2], sizeof(info.SensorDeviceID));
+        memcpy(&info.TrackID, &mData[3], sizeof(info.TrackID));
+        memcpy(&info.X, &mData[8], sizeof(info.X));
+        memcpy(&info.Y, &mData[12], sizeof(info.Y));
+        memcpy(&info.Z, &mData[16], sizeof(info.Z));
+        memcpy(&info.Speed, &mData[20], sizeof(info.Speed));
+        memcpy(&info.RCS, &mData[24], sizeof(info.RCS));
+        memcpy(&info.Reserved, &mData[26], sizeof(info.Reserved));
+        memcpy(&info.TriggerFlag, &mData[28], sizeof(info.TriggerFlag));
+        memcpy(&info.Lane, &mData[29], sizeof(info.Lane));
+        memcpy(&info.Class, &mData[30], sizeof(info.Class));
+        memcpy(&info.CRC, &mData[31], sizeof(info.CRC));
+        memcpy(&info.CRC, &mData[31], sizeof(info.CRC));
+        memcpy(&info.Footer, &mData[32], sizeof(info.Footer));
+        if (info.Footer != 0xDEFF) {
+            LogE(TAG, "TRACK PACKET 错误的尾部");
+            return;
+        }
+        _TrackInfo.push_back(info);
+    }
+
+#ifdef ENABLE_CAMERA
+    if (!TrackFlag && camera != nullptr) {
+//        camera->stop();
+//        camera->start();
+        if (camera->isOpened()) {
+            Mat img = camera->GetImage();
+            if (img.empty()) {
+                LogE(TAG, "图片获取失败");
+            } else {
+                LogI(TAG, "图片获取成功");
+                resize(img, img, Size(width, height));
+                TrackFlag = true;
+                thread thread(RunTracks, img, _TrackInfo);
+                thread.detach();
+            }
+        } else {
+            LogE(TAG, "视频流开启失败");
+        }
+    }
+#endif
 }
 
-struct TrackInfo {
-    unsigned short SensorDeviceID = 0;
-    unsigned int TrackID = 0;
-    float X = 0, Y = 0, Z = 0, Speed = 0;
-    unsigned short RCS = 0, Reserved;
-    unsigned char TriggerFlag, Lane, Class, CRC;
-    unsigned short Footer;
-};
-bool TrackFlag = false;
 
 void Track(Mat img, TrackInfo trackInfo) {
     try {
@@ -118,7 +214,7 @@ void Track(Mat img, TrackInfo trackInfo) {
 //                + "[" + to_string(u32Height) + "]" + ".png", img);
 //        out.write(img);
         if (out.isOpened())
-            out << img;
+            out.write(img);
     } catch (cv::Exception &e) {
         LogE(TAG, "处理数据失败:%s", e.what());
     }
@@ -150,6 +246,7 @@ void RunTrack(unsigned char *rData) {
         LogE(TAG, "TRACK PACKET 错误的尾部");
 //        return;
     }
+
     LogI(TAG,
          "\nSensorDeviceID\t\t:%d"
          "\nTrackID\t\t\t:%d"
@@ -164,6 +261,7 @@ void RunTrack(unsigned char *rData) {
          info.TriggerFlag,
          info.Lane,
          info.Class);
+
 #ifdef ENABLE_CAMERA
     if (!TrackFlag && camera != nullptr) {
 //        camera->stop();
@@ -224,7 +322,7 @@ void read_cb(UdpServer &udpServer) {
                 return;
             }
             LogD(TAG, "接收到 STATUS PACKET;准备处理");
-            RunStatus(rData);
+            RunStatus(rData, udpServer);
             break;
         case 0x2101://3.TRACK PACKET
             if (len != 34) {
@@ -236,7 +334,7 @@ void read_cb(UdpServer &udpServer) {
                 return;
             }
             LogD(TAG, "接收到 TRACK PACKET;准备处理");
-            RunTrack(rData);
+            // RunTrack(rData);
             break;
         case 0x5101://4.STATISTICS PACKET for Approaching direction
             LogI(TAG, "接收到 STATISTICS PACKET for Approaching direction，丢弃不处理");
