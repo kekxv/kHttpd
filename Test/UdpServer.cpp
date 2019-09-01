@@ -67,7 +67,10 @@ void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
                 s32X += trackInfo.Speed * z_Z;
                 s32Y += trackInfo.Speed * z_Z;
             }
-            u32Width = u32Height = trackInfo.Z * z_Z; //(200-Z)/2;
+            u32Width = u32Height = OG_VIDEO_WIDTH - trackInfo.Z * z_Z; //(200-Z)/2;
+            if (u32Width < 0) {
+                u32Width = u32Height = 0 - u32Width;
+            }
             if (s32X < 0) s32X = 0;
             if (s32Y < 0) s32Y = 0;
             Rect rect = Rect((int) s32X, (int) s32Y, (int) u32Width, (int) u32Height);//起点；长宽
@@ -75,7 +78,7 @@ void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
             rectangle(img, rect, color, 2, LINE_8);
 
             cv::Point origin;
-            origin.x = s32X + u32Width / 2;
+            origin.x = s32X;
             origin.y = s32Y + u32Height / 2;
             cv::putText(img, to_string(trackInfo.TrackID), origin, cv::FONT_HERSHEY_COMPLEX, 2, cv::Scalar(0, 255, 255),
                         2, 8, false);
@@ -116,6 +119,7 @@ void RunStatus(unsigned char *rData, UdpServer &udpServer) {
         LogE(TAG, "STATUS PACKET 错误的尾部");
         return;
     }
+    /*
     LogI(TAG,
          "\nAlive\t\t\t:0x%02X"
          "\nFrameSize\t\t:0x%02X"
@@ -130,6 +134,7 @@ void RunStatus(unsigned char *rData, UdpServer &udpServer) {
          verCore,
          verAnalytics,
          verFirmware);
+         */
 
     unsigned char mData[BUF_SIZE];
     int len;
