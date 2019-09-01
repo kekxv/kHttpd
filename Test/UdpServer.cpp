@@ -53,13 +53,13 @@ unsigned char CheckSum(const unsigned char *data, int N) {
  * 跟踪消息处理
  * @param rData
  */
-void RunTracks(Mat img,vector<TrackInfo> trackInfos){
+void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
     try {
         double s32X, s32Y, u32Height, u32Width;
         double OG_VIDEO_WIDTH = img.cols;
         double OG_VIDEO_HEIGHT = img.rows;
         double OG_REGION_FOUCS = OG_VIDEO_WIDTH;
-        for(auto trackInfo : trackInfos) {
+        for (auto trackInfo : trackInfos) {
             //1280*720
             s32X = trackInfo.X * z_Z + z_x;
             s32Y = trackInfo.Y * z_Z + z_y;
@@ -73,6 +73,13 @@ void RunTracks(Mat img,vector<TrackInfo> trackInfos){
             Rect rect = Rect((int) s32X, (int) s32Y, (int) u32Width, (int) u32Height);//起点；长宽
             Scalar color = Scalar(0, 255, 0);
             rectangle(img, rect, color, 2, LINE_8);
+
+            cv::Point origin;
+            origin.x = s32X + u32Width / 2;
+            origin.y = s32Y + u32Height / 2;
+            cv::putText(img, to_string(trackInfo.TrackID), origin, cv::FONT_HERSHEY_COMPLEX, 2, cv::Scalar(0, 255, 255),
+                        2, 8, false);
+
         }
         if (out.isOpened())
             out.write(img);
@@ -82,6 +89,7 @@ void RunTracks(Mat img,vector<TrackInfo> trackInfos){
     TrackFlag = false;
 
 }
+
 /**
  * 状态消息处理
  * @param rData
