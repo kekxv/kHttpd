@@ -117,7 +117,8 @@ void Track(Mat img, TrackInfo trackInfo) {
 //                + "[" + to_string(u32Width) + "]"
 //                + "[" + to_string(u32Height) + "]" + ".png", img);
 //        out.write(img);
-        out << img;
+        if (out.isOpened())
+            out << img;
     } catch (cv::Exception &e) {
         LogE(TAG, "处理数据失败:%s", e.what());
     }
