@@ -67,7 +67,7 @@ void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
                 s32X += trackInfo.Speed * z_Z;
                 s32Y += trackInfo.Speed * z_Z;
             }
-            u32Width = u32Height = OG_VIDEO_WIDTH - trackInfo.Z * z_Z; //(200-Z)/2;
+            u32Width = u32Height = OG_VIDEO_WIDTH / z_Z - trackInfo.Z * z_Z; //(200-Z)/2;
             if (u32Width < 0) {
                 u32Width = u32Height = 0 - u32Width;
             }
