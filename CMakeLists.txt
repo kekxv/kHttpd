@@ -33,6 +33,9 @@ if (APPLE)
     set(LIBEVENT_LIBRARIES event)
     link_directories(. /usr/local/lib/)
 endif ()
+if(LIBEVENT_LIBRARIES MATCHES "")
+    set(LIBEVENT_LIBRARIES event event_core event_extra)
+endif()
 
 add_executable(kHttpdDemo
         main.cpp
