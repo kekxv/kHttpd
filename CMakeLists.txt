@@ -20,7 +20,7 @@ include_directories(
 
 find_library(dl dl)
 find_library(pthread pthread)
-find_library(libevent libevent)
+find_library(Libevent Libevent)
 include_directories(.
         Camera
         ${LIBEVENT_INCLUDE_DIRS}
@@ -30,6 +30,7 @@ include_directories(.
 if (APPLE)
     link_directories(. /usr/local/lib/)
     set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
+    set(LIBEVENT_LIBRARIES event)
     link_directories(. /usr/local/lib/)
 endif ()
 
@@ -52,4 +53,4 @@ link_directories(.)
 add_executable(test_tcp
         Test/test.cpp
         )
-TARGET_LINK_LIBRARIES(test_tcp dl kHttpd event)
+TARGET_LINK_LIBRARIES(test_tcp dl kHttpd ${LIBEVENT_LIBRARIES})

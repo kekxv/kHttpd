@@ -7,10 +7,11 @@ add_definitions(
 )
 find_library(dl dl)
 find_library(pthread pthread)
-find_library(libevent libevent)
+find_library(Libevent Libevent)
 
 if (APPLE)
     set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
+    set(LIBEVENT_LIBRARIES event)
     link_directories(. /usr/local/lib/)
 endif ()
 include_directories(.
@@ -25,4 +26,4 @@ aux_source_directory(Cpp CppSource)
 add_library(kHttpd STATIC
             ${CppSource}
         )
-TARGET_LINK_LIBRARIES(kHttpd dl event)
+TARGET_LINK_LIBRARIES(kHttpd dl ${LIBEVENT_LIBRARIES})
