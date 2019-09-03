@@ -59,4 +59,4 @@ if (BUILD_MYSQL)
 
 endif ()
 
-TARGET_LINK_LIBRARIES(kHttpd dl ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES})
+TARGET_LINK_LIBRARIES(kHttpd dl pthread ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES})
