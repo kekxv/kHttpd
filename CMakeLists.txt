@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 
+find_library(PkgConfig REQUIRED)
+
 add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
 

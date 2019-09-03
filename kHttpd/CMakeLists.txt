@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst $(dir $<),,$<)\"'")
 set(CMAKE_CXX_STANDARD 14)
 add_definitions(
