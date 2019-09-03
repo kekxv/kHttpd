@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
             str1[i++] = ch;
             putchar('*');
         }
+        putchar('\n');
         str1[i] = '\0';
         password = str1;
     }
