@@ -56,7 +56,6 @@ if (BUILD_MYSQL)
 
     include_directories(${CMAKE_BINARY_DIR}/dependencies/include/)
     add_dependencies(kHttpd mysqlclient)
-
 endif ()
 
-TARGET_LINK_LIBRARIES(kHttpd dl pthread ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES})
+TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)

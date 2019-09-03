@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
 
-option(ENABLE_CAMERA "option for CAMERA" OFF)
+option(ENABLE_CAMERA "option for CAMERA" ON)
 if (ENABLE_CAMERA)
     add_definitions(-DENABLE_CAMERA)
     add_subdirectory(Camera)
@@ -33,9 +33,9 @@ if (APPLE)
     set(LIBEVENT_LIBRARIES event)
     link_directories(. /usr/local/lib/)
 endif ()
-if(LIBEVENT_LIBRARIES MATCHES "")
+if (LIBEVENT_LIBRARIES MATCHES "")
     set(LIBEVENT_LIBRARIES event event_core event_extra)
-endif()
+endif ()
 
 add_executable(kHttpdDemo
         main.cpp
@@ -53,7 +53,7 @@ TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )
-TARGET_LINK_LIBRARIES(udpServer dl kHttpd pthread ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS} ${LIBEVENT_LIBRARIES})
+TARGET_LINK_LIBRARIES(udpServer kHttpd ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS} ${LIBEVENT_LIBRARIES} dl pthread)
 
 
 link_directories(.)
