@@ -46,6 +46,10 @@ add_executable(kCGITest
         Test/kCGITest.cpp
         )
 TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
+add_executable(mysqlTest
+        Test/mysqlTest.cpp
+        )
+TARGET_LINK_LIBRARIES(mysqlTest dl kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )

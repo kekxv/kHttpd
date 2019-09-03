@@ -1,5 +1,9 @@
 # kHttpd 服务端软件
 
+## v0.4
+
+- 增加 MySQL 支持，请查看 mysqlTest.cpp 例子
+
 ## v0.3
 
 - 增加车牌识别代码
