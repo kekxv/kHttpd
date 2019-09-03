@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
     }
     MySql::FreeRes(res);
 
+    return 0;
     // map 默认会自动排序
     auto data = mySql.query(sql);
     for (size_t i = 0; i < data.size(); i++) {
