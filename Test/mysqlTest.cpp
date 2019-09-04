@@ -76,8 +76,12 @@ int main(int argc, char *argv[]) {
             case 'P':
                 port = strtol(optarg, nullptr, 10);
                 break;
-            default:
+            case '?':
                 show_help();
+                exit(EXIT_SUCCESS);
+                break;
+            default:
+                printf("1:%s\n",optarg);
                 exit(EXIT_SUCCESS);
                 break;
         }
@@ -105,6 +109,7 @@ int main(int argc, char *argv[]) {
     unsigned long long ret = mySql.query(&res, sql);
     if (ret > 0) {
         vector<string> fieldLen;
+        vector<size_t> fieldLens;
         auto field = MySql::fields(res);
         vector<map<string, string>> data = MySql::GetRows(res);
         size_t sumLen = 0;
@@ -123,22 +128,33 @@ int main(int argc, char *argv[]) {
             auto L = (len < 2 ? 2 : len) + 2;
             sprintf(buf, "%%%lds  |", L);
             fieldLen.emplace_back(buf);
+            fieldLens.push_back(L + 2);
             // printf(buf, item.name.c_str());
             sumLen += L + 2 + 1;
         }
         printf("┏");
-        for (size_t i=1; i<sumLen; i++) {
-            putchar('-');
+        for (size_t l = 0; l < fieldLens.size(); l++) {
+            for (size_t i = 0; i < fieldLens[l]; i++) {
+                putchar('-');
+            }
+            if (l < fieldLens.size() - 1) {
+                printf("┳");
+            }
         }
         // 输出数据
         printf("┓\n");
         printf("|");
         for (size_t i = 0; i < field.size(); i++) {
-             printf(fieldLen[i].c_str(), field[i].name.c_str());
+            printf(fieldLen[i].c_str(), field[i].name.c_str());
         }
         printf("\n┣");
-        for (size_t i=1; i<sumLen; i++) {
-            putchar('-');
+        for (size_t l = 0; l < fieldLens.size(); l++) {
+            for (size_t i = 0; i < fieldLens[l]; i++) {
+                putchar('-');
+            }
+            if (l < fieldLens.size() - 1) {
+                printf("╋");
+            }
         }
         // 输出数据
         printf("┫\n");
@@ -150,8 +166,13 @@ int main(int argc, char *argv[]) {
             printf("\n");
         }
         printf("┗");
-        for (; sumLen > 1; sumLen--) {
-            putchar('-');
+        for (size_t l = 0; l < fieldLens.size(); l++) {
+            for (size_t i = 0; i < fieldLens[l]; i++) {
+                putchar('-');
+            }
+            if (l < fieldLens.size() - 1) {
+                printf("┻");
+            }
         }
         // 输出数据
         printf("┛\n");
@@ -162,8 +183,8 @@ int main(int argc, char *argv[]) {
     // map 默认会自动排序
     auto data = mySql.query(sql);
     for (size_t i = 0; i < data.size(); i++) {
-        map<string,string> row = data[i];
-        if(i==0) {
+        map<string, string> row = data[i];
+        if (i == 0) {
             for (const auto &item : row) {
                 printf("%s | ", item.first.c_str());
             }
