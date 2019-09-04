@@ -37,7 +37,7 @@ if (BUILD_MYSQL)
     ExternalProject_Add(mysqlclient
             URL https://downloads.mysql.com/archives/get/file/mysql-connector-c-6.1.11-src.tar.gz
             URL_MD5 "98ca2071f9d4c6b73146cc0455f6b914"
-            CONFIGURE_COMMAND cmake <SOURCE_DIR>
+            CONFIGURE_COMMAND cmake -DSTACK_DIRECTION=-1 -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} <SOURCE_DIR>
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
             BUILD_COMMAND ${MAKE}
