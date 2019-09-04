@@ -157,3 +157,18 @@ vector<map<string, string>> MySql::query(const string &sql) {
     return datas;
 }
 
+void MySql::beginTransaction() {
+    mysql_autocommit(mysql, false);
+}
+
+void MySql::commit() {
+    mysql_commit(mysql);
+    mysql_autocommit(mysql, true);
+}
+
+void MySql::rollBack() {
+    mysql_rollback(mysql);
+    mysql_autocommit(mysql, true);
+}
+
+

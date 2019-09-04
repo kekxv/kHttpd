@@ -36,7 +36,7 @@ if (APPLE)
     link_directories(. /usr/local/lib/)
 endif ()
 if (LIBEVENT_LIBRARIES MATCHES "")
-    set(LIBEVENT_LIBRARIES event event_core event_extra)
+    set(LIBEVENT_LIBRARIES event)
 endif ()
 
 add_executable(kHttpdDemo
@@ -52,6 +52,10 @@ add_executable(mysqlTest
         Test/mysqlTest.cpp
         )
 TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
+add_executable(sqliteTest
+        Test/sqliteTest.cpp
+        )
+TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )

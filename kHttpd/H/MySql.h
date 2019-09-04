@@ -70,6 +70,11 @@ public:
 
     string GetErrMessage();
 
+    void beginTransaction();
+    void commit();
+    void rollBack();
+
+
     unsigned long long exec(const string &sql);
 
     unsigned long long query(MYSQL_RES **result, const string &sql);

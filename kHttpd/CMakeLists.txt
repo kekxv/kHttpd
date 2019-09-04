@@ -37,7 +37,7 @@ if (BUILD_MYSQL)
     ExternalProject_Add(mysqlclient
             URL https://downloads.mysql.com/archives/get/file/mysql-connector-c-6.1.11-src.tar.gz
             URL_MD5 "98ca2071f9d4c6b73146cc0455f6b914"
-            CONFIGURE_COMMAND cmake -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
+            CONFIGURE_COMMAND cmake -DSTACK_DIRECTION=-1 -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} <SOURCE_DIR>
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
             BUILD_COMMAND ${MAKE}
@@ -50,7 +50,6 @@ if (BUILD_MYSQL)
         set(prefix "lib")
         set(suffix ".a")
     endif ()
-
     set(mysqlclient_LIBRARIES
             "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}"
             "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}")
@@ -59,4 +58,30 @@ if (BUILD_MYSQL)
     add_dependencies(kHttpd mysqlclient)
 endif ()
 
-TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
+option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
+if (BUILD_MYSQL)
+    ExternalProject_Add(sqlite3
+            URL https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz
+            URL_MD5 "8f3dfe83387e62ecb91c7c5c09c688dc"
+            CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} <SOURCE_DIR>/configure --host=${CMAKE_SYSTEM_PROCESSOR}
+            PREFIX ${CMAKE_BINARY_DIR}/dependencies
+            INSTALL_DIR ${INSTALL_DIR}
+            BUILD_COMMAND ${MAKE}
+            )
+    set(sqlite3_LIB_DIR "${CMAKE_BINARY_DIR}/dependencies/lib")
+    if (WIN32)
+        set(prefix "")
+        set(suffix ".lib")
+    else ()
+        set(prefix "lib")
+        set(suffix ".a")
+    endif ()
+    set(sqlite3_LIBRARIES
+            "${sqlite3_LIB_DIR}/${prefix}sqlite3${suffix}"
+            "${sqlite3_LIB_DIR}/${prefix}sqlite3${suffix}")
+
+    include_directories(${CMAKE_BINARY_DIR}/dependencies/include/)
+    add_dependencies(kHttpd sqlite3)
+endif ()
+
+TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${sqlite3_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
