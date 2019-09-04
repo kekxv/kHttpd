@@ -63,7 +63,7 @@ if (BUILD_MYSQL)
     ExternalProject_Add(sqlite3
             URL https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz
             URL_MD5 "8f3dfe83387e62ecb91c7c5c09c688dc"
-            CONFIGURE_COMMAND <SOURCE_DIR>/configure
+            CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} <SOURCE_DIR>/configure --host=${CMAKE_SYSTEM_PROCESSOR}
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
             BUILD_COMMAND ${MAKE}
