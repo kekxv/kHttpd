@@ -52,6 +52,10 @@ add_executable(mysqlTest
         Test/mysqlTest.cpp
         )
 TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
+add_executable(sqliteTest
+        Test/sqliteTest.cpp
+        )
+TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
 add_executable(udpServer
         Test/UdpServer.cpp
         )

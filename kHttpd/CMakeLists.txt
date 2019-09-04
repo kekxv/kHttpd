@@ -50,7 +50,6 @@ if (BUILD_MYSQL)
         set(prefix "lib")
         set(suffix ".a")
     endif ()
-
     set(mysqlclient_LIBRARIES
             "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}"
             "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}")
@@ -59,4 +58,30 @@ if (BUILD_MYSQL)
     add_dependencies(kHttpd mysqlclient)
 endif ()
 
-TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
+option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
+if (BUILD_MYSQL)
+    ExternalProject_Add(sqlite3
+            URL https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz
+            URL_MD5 "8f3dfe83387e62ecb91c7c5c09c688dc"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+            PREFIX ${CMAKE_BINARY_DIR}/dependencies
+            INSTALL_DIR ${INSTALL_DIR}
+            BUILD_COMMAND ${MAKE}
+            )
+    set(sqlite3_LIB_DIR "${CMAKE_BINARY_DIR}/dependencies/lib")
+    if (WIN32)
+        set(prefix "")
+        set(suffix ".lib")
+    else ()
+        set(prefix "lib")
+        set(suffix ".a")
+    endif ()
+    set(sqlite3_LIBRARIES
+            "${sqlite3_LIB_DIR}/${prefix}sqlite3${suffix}"
+            "${sqlite3_LIB_DIR}/${prefix}sqlite3${suffix}")
+
+    include_directories(${CMAKE_BINARY_DIR}/dependencies/include/)
+    add_dependencies(kHttpd sqlite3)
+endif ()
+
+TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${sqlite3_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
