@@ -36,7 +36,7 @@ if (APPLE)
     link_directories(. /usr/local/lib/)
 endif ()
 if (LIBEVENT_LIBRARIES MATCHES "")
-    set(LIBEVENT_LIBRARIES event event_core event_extra)
+    set(LIBEVENT_LIBRARIES event)
 endif ()
 
 add_executable(kHttpdDemo
