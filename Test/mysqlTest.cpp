@@ -109,7 +109,9 @@ int main(int argc, char *argv[]) {
         vector<map<string, string>> data = MySql::GetRows(res);
         size_t sumLen = 0;
         // 输出字段头，并且计算占位符
-        printf("|");
+        // printf("┏┳┓");
+        // printf("┣╋┫");
+        // printf("┗┻┛");
         for (const auto &item : field) {
             size_t len = item.name.length();
             for (auto da:data) {
@@ -121,15 +123,25 @@ int main(int argc, char *argv[]) {
             auto L = (len < 2 ? 2 : len) + 2;
             sprintf(buf, "%%%lds  |", L);
             fieldLen.emplace_back(buf);
-            printf(buf, item.name.c_str());
+            // printf(buf, item.name.c_str());
             sumLen += L + 2 + 1;
         }
-        printf("\n|");
-        for (; sumLen > 1; sumLen--) {
+        printf("┏");
+        for (size_t i=1; i<sumLen; i++) {
             putchar('-');
         }
         // 输出数据
-        printf("|\n");
+        printf("┓\n");
+        printf("|");
+        for (size_t i = 0; i < field.size(); i++) {
+             printf(fieldLen[i].c_str(), field[i].name.c_str());
+        }
+        printf("\n┣");
+        for (size_t i=1; i<sumLen; i++) {
+            putchar('-');
+        }
+        // 输出数据
+        printf("┫\n");
         for (auto da:data) {
             printf("|");
             for (size_t i = 0; i < field.size(); i++) {
@@ -137,6 +149,12 @@ int main(int argc, char *argv[]) {
             }
             printf("\n");
         }
+        printf("┗");
+        for (; sumLen > 1; sumLen--) {
+            putchar('-');
+        }
+        // 输出数据
+        printf("┛\n");
     }
     MySql::FreeRes(res);
 
