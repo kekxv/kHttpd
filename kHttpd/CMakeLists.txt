@@ -37,7 +37,7 @@ if (BUILD_MYSQL)
     ExternalProject_Add(mysqlclient
             URL https://github.com/kekxv/mysqlclient/archive/master.zip
             URL_MD5 "c4349d24b9bfe3a234d8ef225d021528"
-            CONFIGURE_COMMAND cmake -DSTACK_DIRECTION=-1 -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} <SOURCE_DIR>
+            CONFIGURE_COMMAND cmake -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dependencies -DSTACK_DIRECTION=-1 -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} <SOURCE_DIR>
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
             BUILD_COMMAND ${MAKE}
@@ -62,7 +62,7 @@ if (BUILD_MYSQL)
     ExternalProject_Add(sqlite3
             URL https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz
             URL_MD5 "8f3dfe83387e62ecb91c7c5c09c688dc"
-            CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} <SOURCE_DIR>/configure --host=${CMAKE_SYSTEM_PROCESSOR}
+            CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} <SOURCE_DIR>/configure --host=${CMAKE_SYSTEM_PROCESSOR} --prefix=${CMAKE_BINARY_DIR}/dependencies
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
             BUILD_COMMAND ${MAKE}
