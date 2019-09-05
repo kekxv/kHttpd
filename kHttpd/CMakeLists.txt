@@ -17,7 +17,7 @@ if (APPLE)
 endif ()
 
 if (LIBEVENT_LIBRARIES MATCHES "")
-    set(LIBEVENT_LIBRARIES event event_core event_extra)
+    set(LIBEVENT_LIBRARIES event)
 endif ()
 include_directories(.
         H
@@ -35,8 +35,8 @@ include(ExternalProject)
 option(BUILD_MYSQL "Build the CppUnit library (optional; used for unit testing)" ON)
 if (BUILD_MYSQL)
     ExternalProject_Add(mysqlclient
-            URL https://downloads.mysql.com/archives/get/file/mysql-connector-c-6.1.11-src.tar.gz
-            URL_MD5 "98ca2071f9d4c6b73146cc0455f6b914"
+            URL https://github.com/kekxv/mysqlclient/archive/master.zip
+            URL_MD5 "c4349d24b9bfe3a234d8ef225d021528"
             CONFIGURE_COMMAND cmake -DSTACK_DIRECTION=-1 -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} <SOURCE_DIR>
             PREFIX ${CMAKE_BINARY_DIR}/dependencies
             INSTALL_DIR ${INSTALL_DIR}
@@ -51,7 +51,6 @@ if (BUILD_MYSQL)
         set(suffix ".a")
     endif ()
     set(mysqlclient_LIBRARIES
-            "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}"
             "${mysqlclient_LIB_DIR}/${prefix}mysqlclient${suffix}")
 
     include_directories(${CMAKE_BINARY_DIR}/dependencies/include/)
