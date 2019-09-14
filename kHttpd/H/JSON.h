@@ -42,6 +42,7 @@ namespace kHttpdName {
         void Add(const JSON& json,const string& key);
         void Add(const JSON& json);
         void Add(const string& key,const JSON& json);
+        void Add(const string& key,const string &value);
         void Remove(int index);
         void Remove(const string& key);
 

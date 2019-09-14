@@ -98,6 +98,9 @@ void JSON::Add(const string &key, const JSON &json) {
     Add(json, key);
 }
 
+void JSON::Add(const string &key, const string &value) {
+    Add(JSON(cJSON_CreateString(value.c_str())), key);
+}
 void JSON::Add(const JSON &json) {
     cJSON_AddItemToArray(cJson, json.GetNewCJson());
 }
