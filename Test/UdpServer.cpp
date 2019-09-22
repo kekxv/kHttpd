@@ -83,7 +83,7 @@ void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
             origin.x = trackInfo.X;
             origin.y = trackInfo.Y + trackInfo.Height / 2;
             cv::putText(img, to_string(trackInfo.TrackID), origin,
-                        cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 255, 255),
+                        cv::FONT_HERSHEY_COMPLEX, 2, cv::Scalar(0, 255, 255),
                         2, 8, false);
 
         }
