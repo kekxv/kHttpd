@@ -53,6 +53,12 @@ struct TrackInfo {
 };
 bool TrackFlag = false;
 
+/**
+ * 校验
+ * @param data
+ * @param N
+ * @return
+ */
 unsigned char CheckSum(const unsigned char *data, int N) {
     unsigned char chksum = 0;
     for (int idx = 0; idx < N; idx++)
@@ -67,15 +73,21 @@ unsigned char CheckSum(const unsigned char *data, int N) {
 void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
     try {
         for (auto trackInfo : trackInfos) {
-
-//            s->thickness = 3;
-//            s->hsub = 1;
-//            s->vsub = 1;
-
             if (trackInfo.X < 0) trackInfo.X = 0;
             if (trackInfo.Y < 0) trackInfo.Y = 0;
             Rect rect = Rect((int) trackInfo.X, (int) trackInfo.Y, (int) trackInfo.Width,
                              (int) trackInfo.Height);//起点；长宽
+
+            if (carNumOcr != nullptr) {
+                // 开启 OCR 识别
+                LogI("CarNumOcr", "识别位置 \t x:%6d y:%6d ", rect.x,rect.y);
+                Mat ocr = img(rect);
+                vector<std::pair<std::string, float>> num = carNumOcr->GetCarNum(&ocr);
+                for (auto &item : num) {
+                    LogI("CarNumOcr", "车牌识别结果 %s : %3f ", item.first.c_str(), item.second);
+                }
+            }
+
             Scalar color = Scalar(0, 255, 0);
             rectangle(img, rect, color, 2, LINE_8);
 
@@ -311,7 +323,9 @@ void show_help() {
                        "-x                  原点偏移 x\n"
                        "-y                  原点偏移 y\n"
                        "-Z                  汽车和距离的比例\n"
+                       "-F                  查看图片\n"
                        "-o <video path>     要保存的视频地址\n"
+                       "-f                  要保存的视频地址fps\n"
                        "-O <CarNumOcr>      enable CarNumOcr\n"
                        "-h                  print this help and exit\n"
                        "\n";
@@ -323,12 +337,13 @@ int main(int argc, char *argv[]) {
     //默认参数
     string httpd_option_listen = "0.0.0.0";
     int httpd_option_port = 9935;
+    int fps = 5;
     bool cTest = false;
     string outVideo;
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:Z:o:")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:f:Z:o:")) != -1) {
         switch (c) {
             case 'F' :
                 imshow(optarg, imread(optarg));
@@ -349,6 +364,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'Z' :
                 z_Z = strtof((const char *) optarg, nullptr);
+                break;
+            case 'f' :
+                fps = strtol((const char *) optarg, nullptr, 10);
                 break;
             case 'W' :
                 OG_VIDEO_WIDTH = strtol((const char *) optarg, nullptr, 10);
@@ -394,7 +412,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
     if (!outVideo.empty())
-        out.open(outVideo, VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, Size(OG_VIDEO_WIDTH, OG_VIDEO_HEIGHT));
+        out.open(outVideo, VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, Size(OG_VIDEO_WIDTH, OG_VIDEO_HEIGHT));
 
 
     UdpServer udpServer(httpd_option_listen, httpd_option_port);
