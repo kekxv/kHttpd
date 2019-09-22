@@ -74,7 +74,6 @@ void RunTracks(Mat img, vector<TrackInfo> trackInfos) {
 
             if (trackInfo.X < 0) trackInfo.X = 0;
             if (trackInfo.Y < 0) trackInfo.Y = 0;
-            LogD(TAG,"x:%6d \t y:%6d");
             Rect rect = Rect((int) trackInfo.X, (int) trackInfo.Y, (int) trackInfo.Width,
                              (int) trackInfo.Height);//起点；长宽
             Scalar color = Scalar(0, 255, 0);
