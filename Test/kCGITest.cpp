@@ -1,4 +1,5 @@
 //
+// CGI 使用例子
 // Created by caesar on 2019-07-29.
 //
 #include <getopt.h>
