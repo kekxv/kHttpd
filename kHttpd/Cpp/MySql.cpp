@@ -1,7 +1,7 @@
 //
 // Created by caesar on 2019/9/3.
 //
-
+#ifdef BUILD_MYSQL
 #include "MySql.h"
 #include <my_config.h>
 #include <mysql.h>
@@ -171,4 +171,4 @@ void MySql::rollBack() {
     mysql_autocommit(mysql, true);
 }
 
-
+#endif //BUILD_MYSQL

@@ -2,6 +2,7 @@
 // Created by caesar on 2019/9/3.
 //
 
+#ifdef BUILD_MYSQL
 #ifndef KHTTP_MYSQL_H
 #define KHTTP_MYSQL_H
 
@@ -97,3 +98,4 @@ private:
 
 
 #endif //KHTTP_MYSQL_H
+#endif //BUILD_MYSQL

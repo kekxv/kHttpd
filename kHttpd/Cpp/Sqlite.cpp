@@ -2,6 +2,8 @@
 // Created by caesar on 2019/9/4.
 //
 
+#ifdef BUILD_SQLITE3
+
 #include <sqlite3.h>
 #include "Sqlite.h"
 #include <Log.h>
@@ -84,3 +86,5 @@ void Sqlite3::rollBack() {
     exec("ROLLBACK;");
 }
 
+
+#endif //BUILD_SQLITE3

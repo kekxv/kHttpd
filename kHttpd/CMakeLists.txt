@@ -34,6 +34,7 @@ add_library(kHttpd STATIC
 include(ExternalProject)
 option(BUILD_MYSQL "Build the CppUnit library (optional; used for unit testing)" ON)
 if (BUILD_MYSQL)
+    add_definitions(-DBUILD_MYSQL)
     ExternalProject_Add(mysqlclient
             URL https://github.com/kekxv/mysqlclient/archive/master.zip
             URL_MD5 "c4349d24b9bfe3a234d8ef225d021528"
@@ -58,7 +59,8 @@ if (BUILD_MYSQL)
 endif ()
 
 option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
-if (BUILD_MYSQL)
+if (BUILD_SQLITE3)
+    add_definitions(-DBUILD_SQLITE3)
     ExternalProject_Add(sqlite3
             URL https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz
             URL_MD5 "8f3dfe83387e62ecb91c7c5c09c688dc"

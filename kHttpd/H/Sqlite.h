@@ -2,6 +2,7 @@
 // Created by caesar on 2019/9/4.
 //
 
+#ifdef BUILD_SQLITE3
 #ifndef KHTTP_SQLITE3_H
 #define KHTTP_SQLITE3_H
 
@@ -36,3 +37,4 @@ private:
 
 
 #endif //KHTTP_SQLITE3_H
+#endif //BUILD_SQLITE3
