@@ -30,10 +30,10 @@ include_directories(.
         )
 
 if (APPLE)
-    link_directories(. /usr/local/lib/)
+    link_directories(/usr/local/lib/)
     set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
     set(LIBEVENT_LIBRARIES event)
-    link_directories(. /usr/local/lib/)
+    link_directories(/usr/local/lib/)
 endif ()
 if (LIBEVENT_LIBRARIES MATCHES "")
     set(LIBEVENT_LIBRARIES event)
@@ -82,7 +82,7 @@ add_executable(udpServer
 TARGET_LINK_LIBRARIES(udpServer kHttpd ${OpenCV_LIBS} ${Camera_LIBS} ${CarNumOcr_LIBS} ${LIBEVENT_LIBRARIES} dl pthread)
 
 
-link_directories(.)
+#link_directories(.)
 add_executable(test_tcp
         Test/test.cpp
         )

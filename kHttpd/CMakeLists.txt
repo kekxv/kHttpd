@@ -13,7 +13,7 @@ find_library(Libevent Libevent)
 if (APPLE)
     set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
     set(LIBEVENT_LIBRARIES event)
-    link_directories(. /usr/local/lib/)
+    link_directories(/usr/local/lib/)
 endif ()
 
 if (LIBEVENT_LIBRARIES MATCHES "")
@@ -23,7 +23,7 @@ include_directories(.
         H
         ${LIBEVENT_INCLUDE_DIRS}
         )
-link_directories(.)
+#link_directories(.)
 
 aux_source_directory(Cpp CppSource)
 
