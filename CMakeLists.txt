@@ -48,14 +48,22 @@ add_executable(kCGITest
         Test/kCGITest.cpp
         )
 TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
+option(BUILD_MYSQL "Build the CppUnit library (optional; used for unit testing)" ON)
+if (BUILD_MYSQL)
 add_executable(mysqlTest
         Test/mysqlTest.cpp
         )
 TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
+endif()
+
+option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
+if (BUILD_SQLITE3)
 add_executable(sqliteTest
         Test/sqliteTest.cpp
         )
 TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
+endif()
+
 add_executable(udpServer
         Test/UdpServer.cpp
         )
