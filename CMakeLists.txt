@@ -54,6 +54,12 @@ add_executable(mysqlTest
         Test/mysqlTest.cpp
         )
 TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
+
+INSTALL(TARGETS mysqlTest
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION libstatic
+        )
 endif()
 
 option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
@@ -62,6 +68,12 @@ add_executable(sqliteTest
         Test/sqliteTest.cpp
         )
 TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
+
+INSTALL(TARGETS sqliteTest
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION libstatic
+        )
 endif()
 
 add_executable(udpServer
@@ -75,3 +87,9 @@ add_executable(test_tcp
         Test/test.cpp
         )
 TARGET_LINK_LIBRARIES(test_tcp dl kHttpd ${LIBEVENT_LIBRARIES})
+
+INSTALL(TARGETS test_tcp udpServer kCGITest kHttpdDemo
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION libstatic
+        )

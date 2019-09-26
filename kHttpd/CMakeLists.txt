@@ -86,3 +86,8 @@ if (BUILD_SQLITE3)
 endif ()
 
 TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${sqlite3_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
+INSTALL(TARGETS kHttpd
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION libstatic
+        )
