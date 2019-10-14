@@ -135,7 +135,7 @@ namespace kHttpdName {
      * @brief Construct a new Http Response Data object
      *
      */
-    ResponseData::ResponseData(struct evhttp_request *req,map<string, string> *COOKIE) {
+    ResponseData::ResponseData(struct evhttp_request *req, map<string, string> *COOKIE) {
         this->req = req;
         Status = STATUS::OK;
         ContentType = "text/html; charset=UTF-8";
@@ -167,16 +167,17 @@ namespace kHttpdName {
      *
      * @param data
      */
-    void ResponseData::PutData(const string& data) {
+    void ResponseData::PutData(const string &data) {
         BodyDataText = data;
         type = TYPE::Text;
     }
+
     /**
      * @brief 设置返回数据
      *
      * @param data
      */
-    void ResponseData::PutData(const kHttpdName::JSON &_json) {
+    void ResponseData::PutData(const CJsonObject &_json) {
         this->json = _json;
         type = TYPE::JSON;
         ContentType = "application/json; charset=utf-8";
@@ -236,7 +237,7 @@ namespace kHttpdName {
      *
      * @return string
      */
-    JSON ResponseData::GetJSON() throw(int) {
+    CJsonObject ResponseData::GetJSON() throw(int) {
         if (type != TYPE::JSON) {
             throw -1;
         }
@@ -274,6 +275,7 @@ namespace kHttpdName {
             memcpy(Data, BodyData, BodyDataLen);
         return BodyDataLen;
     }
+
     /**
      * @brief Get the Data object 获取二进制数据流
      *

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-
+project(kHttpd)
 find_library(PkgConfig REQUIRED)
 
 add_subdirectory(kHttpd)
@@ -9,7 +9,6 @@ option(ENABLE_CAMERA "option for CAMERA" ON)
 if (ENABLE_CAMERA)
     add_definitions(-DENABLE_CAMERA)
     add_subdirectory(Camera)
-    find_package(OpenCV REQUIRED)
 endif ()
 
 set(CMAKE_CXX_STANDARD 14)
@@ -20,6 +19,7 @@ include_directories(
         libCarNumOcr
 )
 
+find_package(OpenCV REQUIRED)
 find_library(dl dl)
 find_library(pthread pthread)
 find_library(Libevent Libevent)

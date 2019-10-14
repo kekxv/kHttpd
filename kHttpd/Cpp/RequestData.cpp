@@ -47,7 +47,7 @@ RequestData::RequestData(struct evhttp_request *req) {
             char *post_data = (char *) EVBUFFER_DATA(req->input_buffer);
             POST = new GetDataParam(string("?") + post_data);
         } else if (ContentType.find("/json") != string::npos) {
-            json = JSON::parse((char *) EVBUFFER_DATA(req->input_buffer));
+            json = CJsonObject((char *) EVBUFFER_DATA(req->input_buffer));
         }
     }
 

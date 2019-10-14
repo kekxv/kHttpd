@@ -8,7 +8,7 @@
 #include <string>
 #include <map>
 #include <GetDataParam.h>
-#include <JSON.h>
+#include <CJsonObject.hpp>
 
 using namespace std;
 
@@ -59,8 +59,8 @@ namespace kHttpdName {
           * @brief COOKIE 参数
           *
           */
-        map<string,string> COOKIE;
-        JSON json;
+        map<string, string> COOKIE;
+        CJsonObject json;
         /**
           * @brief COOKIE 参数
           *
@@ -109,7 +109,7 @@ namespace kHttpdName {
           */
         const size_t MaxContentLength = 256 * 1024 * 1024;
 
-        unsigned char* GetBodyData();
+        unsigned char *GetBodyData();
 
     private:
         struct evhttp_request *req;

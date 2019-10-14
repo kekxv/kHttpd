@@ -7,7 +7,7 @@
 
 #include <string>
 #include <map>
-#include <JSON.h>
+#include <CJsonObject.hpp>
 using namespace std;
 
 namespace kHttpdName {
@@ -140,7 +140,7 @@ namespace kHttpdName {
          *
          * @param data
          */
-        void PutData(const kHttpdName::JSON &_json);
+        void PutData(const CJsonObject &_json);
         /**
           * @brief 发送数据
           *
@@ -159,7 +159,7 @@ namespace kHttpdName {
          * @return string
          */
         string &GetData() throw(int);
-        kHttpdName::JSON GetJSON() throw(int);
+        CJsonObject GetJSON() throw(int);
         /**
          * @brief Get the File object 获取文件路径
          *
@@ -233,7 +233,7 @@ namespace kHttpdName {
          */
         string BodyDataText;
 
-        kHttpdName::JSON json;
+        CJsonObject json;
 
         /**
          * @brief 类型
