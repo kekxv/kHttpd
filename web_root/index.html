@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+    <script src="MiniAjax.js"></script>
+    <script src="JsFileRead.js"></script>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<body>
+<div style="overflow:auto;padding:0.5em;box-sizing:border-box;position: fixed;left:0;top:0;right:0;height:300px;border-bottom: 1px solid #000;">
+    <input style="float: left" id="fileBtn" type="file" onchange="Update(this)" accept="image/*"/><br/>
+    <hr/>
+    <img id="p" src="" alt="" style="width:auto;max-height: 230px;"/>
+</div>
+<div style="overflow:auto;padding:0.5em;box-sizing:border-box;position: fixed;left:0;top:300px;bottom:0;width:50%;border-right: 1px solid #000;">
+    <h2>模型分类</h2>
+    <button onclick="ObjectAPI()">开始分类</button>
+    <div id="ObjectResult"></div>
+</div>
+<div style="overflow:auto;padding:0.5em;box-sizing:border-box;position: fixed;right:0;top:300px;bottom:0;width:50%;">
+    <h2>车牌识别</h2>
+    <button onclick="OcrCarNum()">开始识别</button>
+    <div id="OcrResult"></div>
+</div>
+</body>
+<script>
+    let Image = null;
+
+    function Update(input) {
+        if (input.files.length > 0) {
+            let jsFileRead = new JsFileRead(input.files[0], {
+                load: function (result) {
+                    document.querySelector("#p").src = result;
+                    Image = result.split(";base64,", 2)[1];
+                    // OcrCarNum();
+                }
+            });
+            jsFileRead.step = 1024 * 1024 * 25;
+            jsFileRead.readBlob();
+        }
+    }
+
+    function OcrCarNum() {
+        if (!Image) return;
+        let ResultDiv = document.querySelector("#OcrResult");
+        ResultDiv.innerHTML = "正在进行识别";
+        let miniAjax = new MiniAjax({
+            url: "/CarNumOcr.json",
+            type: "POST",
+            data: JSON.stringify({
+                image: Image
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (responseText, status) {
+                let json = JSON.parse(responseText);
+                if (json.error === 0) {
+                    if (json.message.length === 0) {
+                        ResultDiv.innerHTML = "未发现车牌";
+                        return;
+                    }
+                    ResultDiv.innerHTML = "发现车牌：<br/>";
+                    for (let i in json.message) {
+                        if (json.message.hasOwnProperty(i)) {
+                            let carNum = json.message[i];
+                            ResultDiv.innerHTML += `&nbsp;&nbsp;&nbsp;&nbsp;${carNum.CarNum} : 准确度：${carNum.Result}<br/>`;
+                        }
+                    }
+                } else {
+                    ResultDiv.innerHTML = json.message;
+                }
+            }
+        });
+        miniAjax.Send();
+    }
+
+    function ObjectAPI() {
+        if (!Image) return;
+        let ResultDiv = document.querySelector("#ObjectResult");
+        ResultDiv.innerHTML = "正在进行分类";
+        let miniAjax = new MiniAjax({
+            url: "/ObjectDetectionAPI",
+            type: "POST",
+            data: JSON.stringify({
+                image: Image
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (responseText, status) {
+                let json = JSON.parse(responseText);
+                if(!!json.message.length){
+                    ResultDiv.innerHTML = JSON.stringify(json.message);
+                }else{
+                    ResultDiv.innerHTML = json.message;
+                }
+            }
+        });
+        miniAjax.Send();
+    }
+</script>
+</html>

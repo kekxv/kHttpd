@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 project(kHttpd)
 find_library(PkgConfig REQUIRED)
 
+if (APPLE)
+    set(OpenCV_DIR /usr/local/lib/cmake/opencv4/)
+    set(Libevent_DIR /usr/local/lib/cmake/libevent/)
+endif()
 add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
 
@@ -22,17 +26,16 @@ include_directories(
 find_package(OpenCV REQUIRED)
 find_library(dl dl)
 find_library(pthread pthread)
-find_library(Libevent Libevent)
+find_package(Libevent REQUIRED)
+
 include_directories(.
         Camera
+        ${kHttpd_INCLUDE_DIRS}
         ${LIBEVENT_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
         )
 
 if (APPLE)
-    link_directories(/usr/local/lib/)
-    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
-    set(LIBEVENT_LIBRARIES event)
     link_directories(/usr/local/lib/)
 endif ()
 if (LIBEVENT_LIBRARIES MATCHES "")
