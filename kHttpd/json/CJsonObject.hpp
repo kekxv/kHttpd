@@ -93,7 +93,7 @@ public:     // method of ordinary json object
 
     bool Get(const std::string &strKey, long &uiValue) const;
 
-    bool Get(const std::string &strKey, int64 &llValue) const;
+    bool Get(const std::string &strKey, cJSON_int64 &llValue) const;
 
     bool Get(const std::string &strKey, uint64 &ullValue) const;
 
@@ -113,7 +113,7 @@ public:     // method of ordinary json object
 
     bool Add(const std::string &strKey, uint32 uiValue);
 
-    bool Add(const std::string &strKey, int64 llValue);
+    bool Add(const std::string &strKey, cJSON_int64 llValue);
 
     bool Add(const std::string &strKey, uint64 ullValue);
 
@@ -134,7 +134,7 @@ public:     // method of ordinary json object
 
     bool Replace(const std::string &strKey, uint32 uiValue);
 
-    bool Replace(const std::string &strKey, int64 llValue);
+    bool Replace(const std::string &strKey, cJSON_int64 llValue);
 
     bool Replace(const std::string &strKey, uint64 ullValue);
 
@@ -161,7 +161,7 @@ public:     // method of json array
 
     bool Get(int iWhich, uint32 &uiValue) const;
 
-    bool Get(int iWhich, int64 &llValue) const;
+    bool Get(int iWhich, cJSON_int64 &llValue) const;
 
     bool Get(int iWhich, uint64 &ullValue) const;
 
@@ -181,7 +181,7 @@ public:     // method of json array
 
     bool Add(uint32 uiValue);
 
-    bool Add(int64 llValue);
+    bool Add(cJSON_int64 llValue);
 
     bool Add(uint64 ullValue);
 
@@ -200,7 +200,7 @@ public:     // method of json array
 
     bool AddAsFirst(uint32 uiValue);
 
-    bool AddAsFirst(int64 llValue);
+    bool AddAsFirst(cJSON_int64 llValue);
 
     bool AddAsFirst(uint64 ullValue);
 
@@ -221,7 +221,7 @@ public:     // method of json array
 
     bool Replace(int iWhich, uint32 uiValue);
 
-    bool Replace(int iWhich, int64 llValue);
+    bool Replace(int iWhich, cJSON_int64 llValue);
 
     bool Replace(int iWhich, uint64 ullValue);
 

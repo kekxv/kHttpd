@@ -186,13 +186,13 @@ static char* print_int(cJSON* item)
 	{
 		if (item->sign == -1)
 		{
-			if ((int64)item->valueint <= (int64)INT_MAX && (int64)item->valueint >= (int64)INT_MIN)
+			if ((cJSON_int64)item->valueint <= (cJSON_int64)INT_MAX && (cJSON_int64)item->valueint >= (cJSON_int64)INT_MIN)
 			{
 				sprintf(str, "%d", (int32)item->valueint);
 			}
 			else
 			{
-				sprintf(str, "%lld", (int64)item->valueint);
+				sprintf(str, "%lld", (cJSON_int64)item->valueint);
 			}
 		}
 		else

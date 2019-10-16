@@ -243,10 +243,10 @@ std::string CJsonObject::operator()(const std::string &strKey) const {
     } else if (pJsonStruct->type == cJSON_Int) {
         char szNumber[128] = {0};
         if (pJsonStruct->sign == -1) {
-            if ((int64) pJsonStruct->valueint <= (int64) INT_MAX && (int64) pJsonStruct->valueint >= (int64) INT_MIN) {
+            if ((cJSON_int64) pJsonStruct->valueint <= (cJSON_int64) INT_MAX && (cJSON_int64) pJsonStruct->valueint >= (cJSON_int64) INT_MIN) {
                 snprintf(szNumber, sizeof(szNumber), "%d", (int32) pJsonStruct->valueint);
             } else {
-                snprintf(szNumber, sizeof(szNumber), "%lld", (int64) pJsonStruct->valueint);
+                snprintf(szNumber, sizeof(szNumber), "%lld", (cJSON_int64) pJsonStruct->valueint);
             }
         } else {
             if (pJsonStruct->valueint <= (uint64) UINT_MAX) {
@@ -290,10 +290,10 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const {
     } else if (pJsonStruct->type == cJSON_Int) {
         char szNumber[128] = {0};
         if (pJsonStruct->sign == -1) {
-            if ((int64) pJsonStruct->valueint <= (int64) INT_MAX && (int64) pJsonStruct->valueint >= (int64) INT_MIN) {
+            if ((cJSON_int64) pJsonStruct->valueint <= (cJSON_int64) INT_MAX && (cJSON_int64) pJsonStruct->valueint >= (cJSON_int64) INT_MIN) {
                 snprintf(szNumber, sizeof(szNumber), "%d", (int32) pJsonStruct->valueint);
             } else {
-                snprintf(szNumber, sizeof(szNumber), "%lld", (int64) pJsonStruct->valueint);
+                snprintf(szNumber, sizeof(szNumber), "%lld", (cJSON_int64) pJsonStruct->valueint);
             }
         } else {
             if (pJsonStruct->valueint <= (uint64) UINT_MAX) {
@@ -529,7 +529,7 @@ bool CJsonObject::Get(const std::string &strKey, uint32 &uiValue) const {
     return (false);
 }
 
-bool CJsonObject::Get(const std::string &strKey, int64 &llValue) const {
+bool CJsonObject::Get(const std::string &strKey, cJSON_int64 &llValue) const {
     cJSON *pJsonStruct = NULL;
     if (m_pJsonData != NULL) {
         if (m_pJsonData->type == cJSON_Object) {
@@ -544,10 +544,10 @@ bool CJsonObject::Get(const std::string &strKey, int64 &llValue) const {
         return (false);
     }
     if (pJsonStruct->type == cJSON_Int) {
-        llValue = (int64) (pJsonStruct->valueint);
+        llValue = (cJSON_int64) (pJsonStruct->valueint);
         return (true);
     } else if (pJsonStruct->type == cJSON_Double) {
-        llValue = (int64) (pJsonStruct->valuedouble);
+        llValue = (cJSON_int64) (pJsonStruct->valuedouble);
         return (true);
     }
     return (false);
@@ -799,7 +799,7 @@ bool CJsonObject::Add(const std::string &strKey, uint32 uiValue) {
     return (true);
 }
 
-bool CJsonObject::Add(const std::string &strKey, int64 llValue) {
+bool CJsonObject::Add(const std::string &strKey, cJSON_int64 llValue) {
     cJSON *pFocusData = NULL;
     if (m_pJsonData != NULL) {
         pFocusData = m_pJsonData;
@@ -1150,7 +1150,7 @@ bool CJsonObject::Replace(const std::string &strKey, uint32 uiValue) {
     return (true);
 }
 
-bool CJsonObject::Replace(const std::string &strKey, int64 llValue) {
+bool CJsonObject::Replace(const std::string &strKey, cJSON_int64 llValue) {
     cJSON *pFocusData = NULL;
     if (m_pJsonData == NULL) {
         pFocusData = m_pExternJsonDataRef;
@@ -1460,7 +1460,7 @@ bool CJsonObject::Get(int iWhich, uint32 &uiValue) const {
     return (false);
 }
 
-bool CJsonObject::Get(int iWhich, int64 &llValue) const {
+bool CJsonObject::Get(int iWhich, cJSON_int64 &llValue) const {
     cJSON *pJsonStruct = NULL;
     if (m_pJsonData != NULL) {
         if (m_pJsonData->type == cJSON_Array) {
@@ -1475,10 +1475,10 @@ bool CJsonObject::Get(int iWhich, int64 &llValue) const {
         return (false);
     }
     if (pJsonStruct->type == cJSON_Int) {
-        llValue = (int64) (pJsonStruct->valueint);
+        llValue = (cJSON_int64) (pJsonStruct->valueint);
         return (true);
     } else if (pJsonStruct->type == cJSON_Double) {
-        llValue = (int64) (pJsonStruct->valuedouble);
+        llValue = (cJSON_int64) (pJsonStruct->valuedouble);
         return (true);
     }
     return (false);
@@ -1739,7 +1739,7 @@ bool CJsonObject::Add(uint32 uiValue) {
     return (true);
 }
 
-bool CJsonObject::Add(int64 llValue) {
+bool CJsonObject::Add(cJSON_int64 llValue) {
     cJSON *pFocusData = NULL;
     if (m_pJsonData != NULL) {
         pFocusData = m_pJsonData;
@@ -2068,7 +2068,7 @@ bool CJsonObject::AddAsFirst(uint32 uiValue) {
     return (true);
 }
 
-bool CJsonObject::AddAsFirst(int64 llValue) {
+bool CJsonObject::AddAsFirst(cJSON_int64 llValue) {
     cJSON *pFocusData = NULL;
     if (m_pJsonData != NULL) {
         pFocusData = m_pJsonData;
@@ -2428,7 +2428,7 @@ bool CJsonObject::Replace(int iWhich, uint32 uiValue) {
     return (true);
 }
 
-bool CJsonObject::Replace(int iWhich, int64 llValue) {
+bool CJsonObject::Replace(int iWhich, cJSON_int64 llValue) {
     cJSON *pFocusData = NULL;
     if (m_pJsonData == NULL) {
         pFocusData = m_pExternJsonDataRef;
