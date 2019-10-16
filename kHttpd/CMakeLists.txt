@@ -13,7 +13,8 @@ find_library(pthread pthread)
 if (APPLE)
     find_package(Libevent REQUIRED)
 else ()
-    find_package(libevent REQUIRED)
+    find_package(libevent)
+    find_library(libevent libevent)
 endif ()
 
 include_directories(.
