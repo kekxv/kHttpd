@@ -5,7 +5,7 @@ find_library(PkgConfig REQUIRED)
 if (APPLE)
     set(OpenCV_DIR /usr/local/lib/cmake/opencv4/)
     set(Libevent_DIR /usr/local/lib/cmake/libevent/)
-endif()
+endif ()
 add_subdirectory(kHttpd)
 add_subdirectory(libCarNumOcr)
 
@@ -26,7 +26,11 @@ include_directories(
 find_package(OpenCV REQUIRED)
 find_library(dl dl)
 find_library(pthread pthread)
-find_package(Libevent REQUIRED)
+if (APPLE)
+    find_package(Libevent REQUIRED)
+else ()
+    find_package(libevent REQUIRED)
+endif ()
 
 include_directories(.
         Camera
@@ -53,31 +57,31 @@ add_executable(kCGITest
 TARGET_LINK_LIBRARIES(kCGITest dl kHttpd)
 option(BUILD_MYSQL "Build the CppUnit library (optional; used for unit testing)" ON)
 if (BUILD_MYSQL)
-add_executable(mysqlTest
-        Test/mysqlTest.cpp
-        )
-TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
+    add_executable(mysqlTest
+            Test/mysqlTest.cpp
+            )
+    TARGET_LINK_LIBRARIES(mysqlTest dl pthread kHttpd)
 
-INSTALL(TARGETS mysqlTest
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION libstatic
-        )
-endif()
+    INSTALL(TARGETS mysqlTest
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION libstatic
+            )
+endif ()
 
 option(BUILD_SQLITE3 "Build the CppUnit library (optional; used for unit testing)" ON)
 if (BUILD_SQLITE3)
-add_executable(sqliteTest
-        Test/sqliteTest.cpp
-        )
-TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
+    add_executable(sqliteTest
+            Test/sqliteTest.cpp
+            )
+    TARGET_LINK_LIBRARIES(sqliteTest dl pthread kHttpd)
 
-INSTALL(TARGETS sqliteTest
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION libstatic
-        )
-endif()
+    INSTALL(TARGETS sqliteTest
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION libstatic
+            )
+endif ()
 
 add_executable(udpServer
         Test/UdpServer.cpp

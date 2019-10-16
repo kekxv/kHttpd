@@ -10,7 +10,11 @@ add_definitions(
 find_package(OpenCV REQUIRED)
 find_library(dl dl)
 find_library(pthread pthread)
-find_package(Libevent REQUIRED)
+if (APPLE)
+    find_package(Libevent REQUIRED)
+else ()
+    find_package(libevent REQUIRED)
+endif ()
 
 include_directories(.
         Camera
