@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <fstream>
 #include <istream>
 #include <cstdlib>
 #include <unistd.h>     //for getopt, fork
