@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <istream>
 #include <cstdlib>
 #include <unistd.h>     //for getopt, fork
 #include <cstring>     //for strcat
@@ -238,7 +239,7 @@ int main(int argc, char *argv[]) {
     kHttpd.SetRoute(carNumOcrCallback, "/CarNumOcr.json");
     if (!tensorflowModePath.empty()) {
         string json;
-        ifstream pin;
+        std::ifstream pin;
         pin.open(tensorflowModePath + "/model.json", ios::in);
         json = string((std::istreambuf_iterator<char>(pin)),
                       std::istreambuf_iterator<char>());
