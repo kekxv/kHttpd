@@ -149,14 +149,14 @@ static const char* parse_number(cJSON* item, const char* num)
 	if (scale == 0 && subscale == 0)
 	{
 		item->valuedouble = (double)(item->sign * n);
-		item->valueint = (uint64)(item->sign * (uint64)n);
+		item->valueint = (cJSON_uint64)(item->sign * (cJSON_uint64)n);
 		item->type = cJSON_Int;
 	}
 	else
 	{
 		n = item->sign * n * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
 		item->valuedouble = (double)n;
-		item->valueint = (uint64)n;
+		item->valueint = (cJSON_uint64)n;
 		item->type = cJSON_Double;
 	}
 	return num;
@@ -188,7 +188,7 @@ static char* print_int(cJSON* item)
 		{
 			if ((cJSON_int64)item->valueint <= (cJSON_int64)INT_MAX && (cJSON_int64)item->valueint >= (cJSON_int64)INT_MIN)
 			{
-				sprintf(str, "%d", (int32)item->valueint);
+				sprintf(str, "%d", (cJSON_int32)item->valueint);
 			}
 			else
 			{
@@ -197,9 +197,9 @@ static char* print_int(cJSON* item)
 		}
 		else
 		{
-			if (item->valueint <= (uint64)UINT_MAX)
+			if (item->valueint <= (cJSON_uint64)UINT_MAX)
 			{
-				sprintf(str, "%u", (uint32)item->valueint);
+				sprintf(str, "%u", (cJSON_uint32)item->valueint);
 			}
 			else
 			{
@@ -984,19 +984,19 @@ cJSON* cJSON_CreateDouble(double num, int sign)
 	{
 		item->type = cJSON_Double;
 		item->valuedouble = num;
-		item->valueint = (uint64)num;
+		item->valueint = (cJSON_uint64)num;
 		item->sign = sign;
 	}
 	return item;
 }
-cJSON* cJSON_CreateInt(uint64 num, int sign)
+cJSON* cJSON_CreateInt(cJSON_uint64 num, int sign)
 {
 	cJSON* item = cJSON_New_Item();
 	if (item)
 	{
 		item->type = cJSON_Int;
 		item->valuedouble = (double)num;
-		item->valueint = (uint64)num;
+		item->valueint = (cJSON_uint64)num;
 		item->sign = sign;
 	}
 	return item;

@@ -24,10 +24,10 @@
 #define cJSON__h
 
 
-typedef int int32;
-typedef unsigned int uint32;
+typedef int cJSON_int32;
+typedef unsigned int cJSON_uint32;
 typedef long long cJSON_int64;
-typedef unsigned long long uint64;
+typedef unsigned long long cJSON_uint64;
 
 #ifdef __cplusplus
 extern "C"
@@ -55,7 +55,7 @@ extern "C"
 		int type; /* The type of the item, as above. */
 
 		char* valuestring; /* The item's string, if type==cJSON_String */
-		uint64 valueint; /* The item's number, if type==cJSON_Number */
+		cJSON_uint64 valueint; /* The item's number, if type==cJSON_Number */
 		double valuedouble; /* The item's number, if type==cJSON_Number */
 		int sign;   /* sign of valueint, 1(unsigned), -1(signed) */
 
@@ -96,7 +96,7 @@ extern "C"
 	extern cJSON* cJSON_CreateFalse();
 	extern cJSON* cJSON_CreateBool(int b);
 	extern cJSON* cJSON_CreateDouble(double num, int sign);
-	extern cJSON* cJSON_CreateInt(uint64 num, int sign);
+	extern cJSON* cJSON_CreateInt(cJSON_uint64 num, int sign);
 	extern cJSON* cJSON_CreateString(const char* string);
 	extern cJSON* cJSON_CreateArray();
 	extern cJSON* cJSON_CreateObject();

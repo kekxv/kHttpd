@@ -35,7 +35,7 @@ public:
 
     std::string toString() const;
 
-    uint64 toNumber() const;
+    cJSON_uint64 toNumber() const;
 
     double toDouble() const;
 
@@ -87,15 +87,15 @@ public:     // method of ordinary json object
 
     bool Get(const std::string &strKey, std::string &strValue) const;
 
-    bool Get(const std::string &strKey, int32 &iValue) const;
+    bool Get(const std::string &strKey, cJSON_int32 &iValue) const;
 
-    bool Get(const std::string &strKey, uint32 &uiValue) const;
+    bool Get(const std::string &strKey, cJSON_uint32 &uiValue) const;
 
     bool Get(const std::string &strKey, long &uiValue) const;
 
     bool Get(const std::string &strKey, cJSON_int64 &llValue) const;
 
-    bool Get(const std::string &strKey, uint64 &ullValue) const;
+    bool Get(const std::string &strKey, cJSON_uint64 &ullValue) const;
 
     bool Get(const std::string &strKey, bool &bValue) const;
 
@@ -109,13 +109,13 @@ public:     // method of ordinary json object
 
     bool Add(const std::string &strKey, const std::string &strValue);
 
-    bool Add(const std::string &strKey, int32 iValue);
+    bool Add(const std::string &strKey, cJSON_int32 iValue);
 
-    bool Add(const std::string &strKey, uint32 uiValue);
+    bool Add(const std::string &strKey, cJSON_uint32 uiValue);
 
     bool Add(const std::string &strKey, cJSON_int64 llValue);
 
-    bool Add(const std::string &strKey, uint64 ullValue);
+    bool Add(const std::string &strKey, cJSON_uint64 ullValue);
 
     bool Add(const std::string &strKey, bool bValue, bool bValueAgain);
 
@@ -130,13 +130,13 @@ public:     // method of ordinary json object
 
     bool Replace(const std::string &strKey, const std::string &strValue);
 
-    bool Replace(const std::string &strKey, int32 iValue);
+    bool Replace(const std::string &strKey, cJSON_int32 iValue);
 
-    bool Replace(const std::string &strKey, uint32 uiValue);
+    bool Replace(const std::string &strKey, cJSON_uint32 uiValue);
 
     bool Replace(const std::string &strKey, cJSON_int64 llValue);
 
-    bool Replace(const std::string &strKey, uint64 ullValue);
+    bool Replace(const std::string &strKey, cJSON_uint64 ullValue);
 
     bool Replace(const std::string &strKey, bool bValue, bool bValueAgain);
 
@@ -157,13 +157,13 @@ public:     // method of json array
 
     bool Get(int iWhich, std::string &strValue) const;
 
-    bool Get(int iWhich, int32 &iValue) const;
+    bool Get(int iWhich, cJSON_int32 &iValue) const;
 
-    bool Get(int iWhich, uint32 &uiValue) const;
+    bool Get(int iWhich, cJSON_uint32 &uiValue) const;
 
     bool Get(int iWhich, cJSON_int64 &llValue) const;
 
-    bool Get(int iWhich, uint64 &ullValue) const;
+    bool Get(int iWhich, cJSON_uint64 &ullValue) const;
 
     bool Get(int iWhich, bool &bValue) const;
 
@@ -177,13 +177,13 @@ public:     // method of json array
 
     bool Add(const std::string &strValue);
 
-    bool Add(int32 iValue);
+    bool Add(cJSON_int32 iValue);
 
-    bool Add(uint32 uiValue);
+    bool Add(cJSON_uint32 uiValue);
 
     bool Add(cJSON_int64 llValue);
 
-    bool Add(uint64 ullValue);
+    bool Add(cJSON_uint64 ullValue);
 
     bool Add(int iAnywhere, bool bValue);
 
@@ -196,13 +196,13 @@ public:     // method of json array
 
     bool AddAsFirst(const std::string &strValue);
 
-    bool AddAsFirst(int32 iValue);
+    bool AddAsFirst(cJSON_int32 iValue);
 
-    bool AddAsFirst(uint32 uiValue);
+    bool AddAsFirst(cJSON_uint32 uiValue);
 
     bool AddAsFirst(cJSON_int64 llValue);
 
-    bool AddAsFirst(uint64 ullValue);
+    bool AddAsFirst(cJSON_uint64 ullValue);
 
     bool AddAsFirst(int iAnywhere, bool bValue);
 
@@ -217,13 +217,13 @@ public:     // method of json array
 
     bool Replace(int iWhich, const std::string &strValue);
 
-    bool Replace(int iWhich, int32 iValue);
+    bool Replace(int iWhich, cJSON_int32 iValue);
 
-    bool Replace(int iWhich, uint32 uiValue);
+    bool Replace(int iWhich, cJSON_uint32 uiValue);
 
     bool Replace(int iWhich, cJSON_int64 llValue);
 
-    bool Replace(int iWhich, uint64 ullValue);
+    bool Replace(int iWhich, cJSON_uint64 ullValue);
 
     bool Replace(int iWhich, bool bValue, bool bValueAgain);
 
