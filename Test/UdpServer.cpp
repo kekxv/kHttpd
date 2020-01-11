@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:hvc:CO::x::y::W::H::F:f:Z:o:")) != -1) {
+    while ((c = getopt(argc, argv, "l:I:p:hvc:CO::x::y::W::H::F:f:Z:o:")) != -1) {
         switch (c) {
             case 'F' :
                 imshow(optarg, imread(optarg));
@@ -377,10 +377,20 @@ int main(int argc, char *argv[]) {
             case 'v' :
                 kHttpdName::Log::setConsoleLevel(3);
                 break;
+            case 'I' :
+#ifdef ENABLE_CAMERA
+		if(camera==nullptr){
+			camera = new Camera(strtol((const char *) optarg, nullptr, 10));
+			camera->start();
+		}
+#endif
+                break;
             case 'c' :
 #ifdef ENABLE_CAMERA
-                camera = new Camera(optarg);
-                camera->start();
+		if(camera==nullptr){
+			camera = new Camera(optarg);
+			camera->start();
+		}
 #endif
                 break;
             case 'C':
