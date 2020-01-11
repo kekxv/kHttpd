@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <fstream>
+#include <istream>
 #include <cstdlib>
 #include <unistd.h>     //for getopt, fork
 #include <cstring>     //for strcat
@@ -10,11 +12,13 @@
 #include <Log.h>
 #include <CarNumOcr.h>
 #include <base64.h>
+#include <ObjectDetection.h>
 
 using namespace std;
 using namespace kHttpdName;
 
 CarNumOcr *carNumOcr = nullptr;
+ObjectDetection *objectDetection = nullptr;
 
 void defaultRouteCallback(RequestData &Request, ResponseData &Response, void *) {
     string output;
@@ -50,37 +54,79 @@ void helloRouteCallback(RequestData &Request, ResponseData &Response, void *) {
 
 }
 
-void carNumOcrCallback(RequestData &Request, ResponseData &Response, void *) {
-    JSON json;
-    if (carNumOcr == nullptr) {
+void objectDetectionAPICallback(RequestData &Request, ResponseData &Response, void *) {
+    CJsonObject json;
+    if (objectDetection == nullptr || !objectDetection->IsReady()) {
         Response.Status = ResponseData::STATUS::InternalServerError;
-        json.Add(JSON(-1), "error");
-        json.Add(JSON("车牌识别未开启"), "message");
+        json.Add("error", -1);
+        json.Add("message", "模型分类未开启或开启失败");
         Response.PutData(json);
         return;
     }
+    string imgBase64 = Request.json["image"].toString();
 
-    string imgBase64 = Request.json["image"].GetString();
     if (imgBase64.empty()) {
-        json.Add(JSON(-1), "error");
-        json.Add(JSON("照片错误"), "message");
+        json.Add("error", -1);
+        json.Add("message", "照片错误");
         Response.PutData(json);
         return;
     }
 
     size_t len = Base64::DecodedLength(imgBase64.c_str(), imgBase64.size());
     vector<unsigned char> img;
-    img.reserve(len);
+    img.resize(len);
     Base64::Decode(imgBase64.c_str(), imgBase64.size(), (char *) img.data(), len);
-    auto ret = carNumOcr->GetCarNum(img.data(), len);
-    JSON jsonArr("[]");
-    for (const auto &i : ret) {
-        JSON json1;
-        json1.Add("Result", JSON(i.second));
-        json1.Add("CarNum", JSON(i.first));
+
+    vector<ObjectData> objectDatas = objectDetection->Detection(img.data(), len);
+    json.Add("error", (0));
+
+    CJsonObject jsonArr("[]");
+    for (const auto &item : objectDatas) {
+        CJsonObject json1;
+        json1.Add("Confidence", item.Confidence);
+        json1.Add("Num", item.Num);
+        json1.Add("label", item.label);
+        json1.Add("xLeftTop", item.xLeftTop);
+        json1.Add("yLeftTop", item.yLeftTop);
+        json1.Add("xRightBottom", item.xRightBottom);
+        json1.Add("yRightBottom", item.yRightBottom);
         jsonArr.Add(json1);
     }
-    json.Add("error", JSON(0));
+    json.Add("message", jsonArr);
+    Response.PutData(json);
+}
+
+void carNumOcrCallback(RequestData &Request, ResponseData &Response, void *) {
+    CJsonObject json;
+    if (carNumOcr == nullptr) {
+        Response.Status = ResponseData::STATUS::InternalServerError;
+        json.Add("error", -1);
+        json.Add("message", "车牌识别未开启");
+        Response.PutData(json);
+        return;
+    }
+
+    string imgBase64 = Request.json["image"].toString();
+    if (imgBase64.empty()) {
+        json.Add("error", -1);
+        json.Add("message", "照片错误");
+        Response.PutData(json);
+        return;
+    }
+
+    size_t len = Base64::DecodedLength(imgBase64.c_str(), imgBase64.size());
+    vector<unsigned char> img;
+    img.resize(len);
+    Base64::Decode(imgBase64.c_str(), imgBase64.size(), (char *) img.data(), len);
+    auto ret = carNumOcr->GetCarNum(img.data(), len);
+    CJsonObject jsonArr("[]");
+    for (const auto &i : ret) {
+        CJsonObject json1;
+        json1.Add("Result", (i.second));
+        json1.Add("CarNum", (i.first));
+        jsonArr.Add(json1);
+    }
+    json.Add("error", (0));
     json.Add("message", jsonArr);
     Response.PutData(json);
 
@@ -95,6 +141,7 @@ void show_help() {
                        "-s <php.sock path>  php sock 模式地址\n"
                        "-C                  车牌识别\n"
                        "-w <web 目录地址>    目录地址\n"
+                       "-T <模型地址>        开启分类识别目录地址\n"
                        "-h                  print this help and exit\n"
                        "\n";
     fprintf(stderr, "%s", help);
@@ -110,10 +157,11 @@ int main(int argc, char *argv[]) {
     int httpd_option_daemon = 0;
     int httpd_option_timeout = 120; //in seconds
     string web = "./";
+    string tensorflowModePath;
 
     //获取参数
     int c;
-    while ((c = getopt(argc, argv, "l:p:ds:t:hvC::w:")) != -1) {
+    while ((c = getopt(argc, argv, "l:p:ds:t:hvC::w:T:")) != -1) {
         switch (c) {
             case 'l' :
                 httpd_option_listen = optarg;
@@ -123,6 +171,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'w' :
                 web = optarg;
+                break;
+            case 'T' :
+                tensorflowModePath = optarg;
                 break;
             case 'p' :
                 httpd_option_port = (int) strtol((const char *) optarg, nullptr, 10);
@@ -187,11 +238,31 @@ int main(int argc, char *argv[]) {
     kHttpd.SetRoute(defaultRouteCallback);
     kHttpd.SetRoute(helloRouteCallback, "/hello");
     kHttpd.SetRoute(carNumOcrCallback, "/CarNumOcr.json");
+    if (!tensorflowModePath.empty()) {
+        string json;
+        std::ifstream pin;
+        pin.open(tensorflowModePath + "/model.json", ios::in);
+        json = string((std::istreambuf_iterator<char>(pin)),
+                      std::istreambuf_iterator<char>());
+        pin.close();
+
+
+        objectDetection = new ObjectDetection(
+                tensorflowModePath + "/model.pb", tensorflowModePath + "/model.pbtxt",
+                json);
+        LogI("CarNumOcr", "开启模型分类！");
+        LogI("CarNumOcr", "模型分类！%s", objectDetection->IsReady() ? "成功" : "失败");
+        kHttpd.SetRoute(objectDetectionAPICallback, "/ObjectDetectionAPI");
+    }
     LogI("kHttpdDemo", "服务器开启：http://%s:%d/", httpd_option_listen, httpd_option_port);
     kHttpd.Listen();
     if (carNumOcr != nullptr) {
         delete carNumOcr;
         carNumOcr = nullptr;
+    }
+    if (objectDetection != nullptr) {
+        delete objectDetection;
+        objectDetection = nullptr;
     }
     return 0;
 }

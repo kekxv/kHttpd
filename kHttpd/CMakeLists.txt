@@ -6,12 +6,26 @@ set(CMAKE_CXX_STANDARD 14)
 add_definitions(
         -DEN_REGEX
 )
+
+find_package(OpenCV REQUIRED)
 find_library(dl dl)
 find_library(pthread pthread)
-find_library(Libevent Libevent)
+if (APPLE)
+    find_package(Libevent REQUIRED)
+else ()
+    find_package(libevent)
+    find_library(libevent libevent)
+endif ()
+
+include_directories(.
+        Camera
+        ${kHttpd_INCLUDE_DIRS}
+        ${LIBEVENT_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+        )
+
 
 if (APPLE)
-    set(LIBEVENT_INCLUDE_DIRS /usr/local/include/)
     set(LIBEVENT_LIBRARIES event)
     link_directories(/usr/local/lib/)
 endif ()
@@ -19,16 +33,40 @@ endif ()
 if (LIBEVENT_LIBRARIES MATCHES "")
     set(LIBEVENT_LIBRARIES event)
 endif ()
+
+set(kHttpd_INCLUDE_DIRS
+        ${CMAKE_SOURCE_DIR}/kHttpd/CGI
+        ${CMAKE_SOURCE_DIR}/kHttpd/database
+        ${CMAKE_SOURCE_DIR}/kHttpd/ObjectDetection
+        ${CMAKE_SOURCE_DIR}/kHttpd/http
+        ${CMAKE_SOURCE_DIR}/kHttpd/json
+        ${CMAKE_SOURCE_DIR}/kHttpd/Tools
+        ${CMAKE_SOURCE_DIR}/kHttpd/udp
+        CACHE INTERNAL ""
+        )
+
 include_directories(.
-        H
+        ${kHttpd_INCLUDE_DIRS}
         ${LIBEVENT_INCLUDE_DIRS}
         )
 #link_directories(.)
 
-aux_source_directory(Cpp CppSource)
+aux_source_directory(CGI CGISource)
+aux_source_directory(database databaseSource)
+aux_source_directory(ObjectDetection ObjectDetectionSource)
+aux_source_directory(http httpSource)
+aux_source_directory(json jsonSource)
+aux_source_directory(Tools ToolsSource)
+aux_source_directory(udp udpSource)
 
 add_library(kHttpd STATIC
-        ${CppSource}
+        ${CGISource}
+        ${databaseSource}
+        ${ObjectDetectionSource}
+        ${httpSource}
+        ${jsonSource}
+        ${ToolsSource}
+        ${udpSource}
         )
 
 include(ExternalProject)
@@ -85,7 +123,7 @@ if (BUILD_SQLITE3)
     add_dependencies(kHttpd sqlite3)
 endif ()
 
-TARGET_LINK_LIBRARIES(kHttpd ${LIBEVENT_LIBRARIES} ${sqlite3_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
+TARGET_LINK_LIBRARIES(kHttpd ${OpenCV_LIBS} ${LIBEVENT_LIBRARIES} ${sqlite3_LIBRARIES} ${mysqlclient_LIBRARIES} dl pthread)
 INSTALL(TARGETS kHttpd
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
